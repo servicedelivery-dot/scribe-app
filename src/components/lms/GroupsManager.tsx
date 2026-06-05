@@ -39,6 +39,9 @@ type Course = {
   published: boolean
 }
 
+type GroupUser = { id: string; userId: string; displayName: string; email: string; role: string }
+type AllUser  = { id: string; email: string; name: string; imageUrl: string; role: string }
+
 export default function GroupsManager({ initialGroups }: { initialGroups: Group[] }) {
   const [groups, setGroups] = useState<Group[]>(initialGroups)
   const [showNewModal, setShowNewModal] = useState(false)
@@ -47,6 +50,9 @@ export default function GroupsManager({ initialGroups }: { initialGroups: Group[
   const [allCourses, setAllCourses] = useState<Course[]>([])
   const [loadingCourses, setLoadingCourses] = useState(false)
   const [deletingGroupId, setDeletingGroupId] = useState<string | null>(null)
+  const [groupUsers, setGroupUsers] = useState<GroupUser[]>([])
+  const [allUsers, setAllUsers] = useState<AllUser[]>([])
+  const [activeTab, setActiveTab] = useState<'courses' | 'users'>('courses')
 
   // New group form state
   const [newName, setNewName] = useState('')
@@ -56,14 +62,19 @@ export default function GroupsManager({ initialGroups }: { initialGroups: Group[
 
   async function openGroup(group: Group) {
     setSelectedGroup(group)
+    setActiveTab('courses')
     setLoadingCourses(true)
     try {
-      const [gc, ac] = await Promise.all([
+      const [gc, ac, gu, au] = await Promise.all([
         fetch(`/api/lms/groups/${group.id}/courses`).then(r => r.json()),
         fetch('/api/lms/courses').then(r => r.json()),
+        fetch(`/api/lms/groups/${group.id}/users`).then(r => r.json()),
+        fetch('/api/lms/users').then(r => r.json()),
       ])
-      setGroupCourses(gc)
-      setAllCourses(ac)
+      setGroupCourses(Array.isArray(gc) ? gc : [])
+      setAllCourses(Array.isArray(ac) ? ac : [])
+      setGroupUsers(Array.isArray(gu) ? gu : [])
+      setAllUsers(Array.isArray(au) ? au : [])
     } finally {
       setLoadingCourses(false)
     }
@@ -93,6 +104,24 @@ export default function GroupsManager({ initialGroups }: { initialGroups: Group[
     setGroups(prev => prev.map(g =>
       g.id === selectedGroup.id ? { ...g, courseCount: updated.length } : g
     ))
+  }
+
+  async function addUser(targetUserId: string) {
+    if (!selectedGroup) return
+    const res = await fetch(`/api/lms/groups/${selectedGroup.id}/users`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ targetUserId }),
+    })
+    if (res.status === 409) return // already in group
+    const updated = await fetch(`/api/lms/groups/${selectedGroup.id}/users`).then(r => r.json())
+    setGroupUsers(Array.isArray(updated) ? updated : [])
+  }
+
+  async function removeUser(targetUserId: string) {
+    if (!selectedGroup) return
+    await fetch(`/api/lms/groups/${selectedGroup.id}/users?userId=${targetUserId}`, { method: 'DELETE' })
+    setGroupUsers(prev => prev.filter(u => u.userId !== targetUserId))
   }
 
   async function createGroup() {
@@ -322,89 +351,127 @@ export default function GroupsManager({ initialGroups }: { initialGroups: Group[
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
-              {/* Courses in group */}
-              <div>
-                <h3 className="text-sm font-semibold mb-3 uppercase tracking-wide" style={{ color: '#64748b' }}>
-                  Courses in this group ({groupCourses.length})
-                </h3>
+            {/* Tab bar */}
+            <div className="flex border-b flex-shrink-0" style={{ borderColor: '#1e3a6e' }}>
+              {(['courses', 'users'] as const).map(tab => (
+                <button key={tab} onClick={() => setActiveTab(tab)}
+                  className="flex-1 py-3 text-sm font-medium capitalize transition-colors"
+                  style={{ color: activeTab === tab ? '#00A3E0' : '#475569', borderBottom: `2px solid ${activeTab === tab ? '#00A3E0' : 'transparent'}` }}>
+                  {tab === 'courses' ? `📚 Courses (${groupCourses.length})` : `👥 Users (${groupUsers.length})`}
+                </button>
+              ))}
+            </div>
 
-                {loadingCourses ? (
-                  <div className="flex justify-center py-8">
-                    <Loader2 className="w-6 h-6 animate-spin" style={{ color: '#00A3E0' }} />
-                  </div>
-                ) : groupCourses.length === 0 ? (
-                  <div
-                    className="text-center py-8 rounded-xl border"
-                    style={{ borderColor: '#1e3a6e', color: '#475569' }}
-                  >
-                    <BookOpen className="w-8 h-8 mx-auto mb-2 opacity-40" />
-                    <p className="text-sm">No courses in this group yet</p>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {groupCourses.map(course => (
-                      <div
-                        key={course.id}
-                        className="flex items-center justify-between px-4 py-3 rounded-lg border"
-                        style={{ background: '#0a1628', borderColor: '#1e3a6e' }}
-                      >
-                        <div className="flex items-center gap-3 min-w-0">
-                          <span className="text-xl">{course.emoji}</span>
-                          <span className="text-sm text-white truncate">{course.title}</span>
-                          {!course.published && (
-                            <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: '#1e3a6e', color: '#64748b' }}>
-                              Draft
-                            </span>
-                          )}
+            <div className="flex-1 overflow-y-auto p-5 space-y-5">
+              {loadingCourses ? (
+                <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin" style={{ color: '#00A3E0' }} /></div>
+              ) : activeTab === 'courses' ? (
+                <>
+                  {/* Courses in group */}
+                  {groupCourses.length === 0 ? (
+                    <div className="text-center py-8 rounded-xl border" style={{ borderColor: '#1e3a6e', color: '#475569' }}>
+                      <BookOpen className="w-8 h-8 mx-auto mb-2 opacity-40" />
+                      <p className="text-sm">No courses in this group yet</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {groupCourses.map(course => (
+                        <div key={course.id} className="flex items-center justify-between px-4 py-3 rounded-lg border"
+                          style={{ background: '#0a1628', borderColor: '#1e3a6e' }}>
+                          <div className="flex items-center gap-3 min-w-0">
+                            <span className="text-xl">{course.emoji}</span>
+                            <span className="text-sm text-white truncate">{course.title}</span>
+                            {!course.published && <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: '#1e3a6e', color: '#64748b' }}>Draft</span>}
+                          </div>
+                          <button onClick={() => removeCourse(course.id)}
+                            className="flex-shrink-0 p-1.5 rounded-lg hover:bg-red-900/40 text-red-400 transition-colors">
+                            <X className="w-4 h-4" />
+                          </button>
                         </div>
-                        <button
-                          onClick={() => removeCourse(course.id)}
-                          className="flex-shrink-0 p-1.5 rounded-lg hover:bg-red-900/40 text-red-400 transition-colors"
-                          title="Remove from group"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+                      ))}
+                    </div>
+                  )}
 
-              {/* Add courses */}
-              {!loadingCourses && availableCourses.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-semibold mb-3 uppercase tracking-wide" style={{ color: '#64748b' }}>
-                    Add courses
-                  </h3>
-                  <div className="space-y-2">
-                    {availableCourses.map(course => (
-                      <div
-                        key={course.id}
-                        className="flex items-center justify-between px-4 py-3 rounded-lg border"
-                        style={{ background: '#0a1628', borderColor: '#1e3a6e' }}
-                      >
-                        <div className="flex items-center gap-3 min-w-0">
-                          <span className="text-xl">{course.emoji}</span>
-                          <span className="text-sm text-white truncate">{course.title}</span>
-                          {!course.published && (
-                            <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: '#1e3a6e', color: '#64748b' }}>
-                              Draft
-                            </span>
-                          )}
-                        </div>
-                        <button
-                          onClick={() => addCourse(course.id)}
-                          className="flex-shrink-0 p-1.5 rounded-lg text-white transition-colors hover:opacity-80"
-                          style={{ background: '#003CA6' }}
-                          title="Add to group"
-                        >
-                          <Plus className="w-4 h-4" />
-                        </button>
+                  {/* Add courses */}
+                  {availableCourses.length > 0 && (
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: '#475569' }}>Add courses</p>
+                      <div className="space-y-2">
+                        {availableCourses.map(course => (
+                          <div key={course.id} className="flex items-center justify-between px-4 py-3 rounded-lg border"
+                            style={{ background: '#0a1628', borderColor: '#1e3a6e' }}>
+                            <div className="flex items-center gap-3 min-w-0">
+                              <span className="text-xl">{course.emoji}</span>
+                              <span className="text-sm text-white truncate">{course.title}</span>
+                            </div>
+                            <button onClick={() => addCourse(course.id)}
+                              className="flex-shrink-0 p-1.5 rounded-lg text-white transition-colors hover:opacity-80"
+                              style={{ background: '#003CA6' }}>
+                              <Plus className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  {/* ── Users tab ── */}
+                  <div className="rounded-xl p-3 text-xs mb-1" style={{ background: 'rgba(0,163,224,0.07)', border: '1px solid rgba(0,163,224,0.2)', color: '#64748b' }}>
+                    <span style={{ color: '#00A3E0' }}>Access control:</span> Users in this group only see courses assigned to this group. Users with no group assignment see all published courses.
                   </div>
-                </div>
+
+                  {/* Members */}
+                  {groupUsers.length === 0 ? (
+                    <div className="text-center py-8 rounded-xl border" style={{ borderColor: '#1e3a6e', color: '#475569' }}>
+                      <p className="text-sm">No users assigned yet</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {groupUsers.map(u => (
+                        <div key={u.id} className="flex items-center gap-3 px-4 py-3 rounded-lg border"
+                          style={{ background: '#0a1628', borderColor: '#1e3a6e' }}>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm text-white font-medium truncate">{u.displayName}</p>
+                            <p className="text-xs truncate" style={{ color: '#475569' }}>{u.email}</p>
+                          </div>
+                          <span className="text-xs px-2 py-0.5 rounded-full capitalize flex-shrink-0" style={{ background: '#1e3a6e', color: '#94a3b8' }}>{u.role}</span>
+                          <button onClick={() => removeUser(u.userId)}
+                            className="flex-shrink-0 p-1.5 rounded-lg hover:bg-red-900/40 text-red-400 transition-colors">
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Add users */}
+                  {allUsers.filter(u => !groupUsers.find(gu => gu.userId === u.id)).length > 0 && (
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: '#475569' }}>Add users</p>
+                      <div className="space-y-2">
+                        {allUsers
+                          .filter(u => !groupUsers.find(gu => gu.userId === u.id))
+                          .map(u => (
+                            <div key={u.id} className="flex items-center gap-3 px-4 py-3 rounded-lg border"
+                              style={{ background: '#0a1628', borderColor: '#1e3a6e' }}>
+                              <img src={u.imageUrl} alt="" className="w-7 h-7 rounded-full flex-shrink-0 bg-gray-700" />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm text-white truncate">{u.name}</p>
+                                <p className="text-xs truncate" style={{ color: '#475569' }}>{u.email}</p>
+                              </div>
+                              <button onClick={() => addUser(u.id)}
+                                className="flex-shrink-0 p-1.5 rounded-lg text-white hover:opacity-80 transition-colors"
+                                style={{ background: '#003CA6' }}>
+                                <Plus className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>

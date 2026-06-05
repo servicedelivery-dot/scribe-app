@@ -178,6 +178,15 @@ export const lmsCourseGroups = pgTable('lms_course_groups', {
   groupId: uuid('group_id').notNull().references(() => lmsGroups.id, { onDelete: 'cascade' }),
 })
 
+// ── User ↔ Group assignments ──────────────────────────────────────────────────
+export const lmsUserGroups = pgTable('lms_user_groups', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: text('user_id').notNull(),
+  groupId: uuid('group_id').notNull().references(() => lmsGroups.id, { onDelete: 'cascade' }),
+  assignedBy: text('assigned_by').notNull(),
+  assignedAt: timestamp('assigned_at').defaultNow().notNull(),
+})
+
 // ── Activity Log ──────────────────────────────────────────────────────────────
 export const lmsActivityLog = pgTable('lms_activity_log', {
   id: uuid('id').primaryKey().defaultRandom(),
