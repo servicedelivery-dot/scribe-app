@@ -188,7 +188,7 @@ export default function ImportLesson({ courses, allModules }: { courses: Course[
   )
 
   return (
-    <div className="p-8 max-w-4xl">
+    <div className="p-4 sm:p-8 max-w-4xl">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-white flex items-center gap-2">
@@ -203,10 +203,10 @@ export default function ImportLesson({ courses, allModules }: { courses: Course[
         {/* Left: Type picker */}
         <div className="lg:col-span-1">
           <p className="text-xs uppercase tracking-wide font-semibold mb-3" style={{ color: '#475569' }}>Content Type</p>
-          <div className="space-y-1">
+          <div className="flex overflow-x-auto gap-1 pb-2 lg:flex-col lg:overflow-visible lg:space-y-0">
             {IMPORT_TYPES.map(t => (
               <button key={t.id} onClick={() => setImportType(t.id)}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-left transition-all"
+                className="flex-shrink-0 flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-left transition-all lg:w-full"
                 style={{
                   background: importType === t.id ? 'rgba(0,60,166,0.25)' : 'transparent',
                   border: `1px solid ${importType === t.id ? ap.blue : 'transparent'}`,
@@ -236,7 +236,7 @@ export default function ImportLesson({ courses, allModules }: { courses: Course[
           </div>
 
           {/* Course + Module pickers */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {sel('Course *', courseId, v => { setCourseId(v); setModuleId('') },
               courses.map(c => ({ id: c.id, label: `${c.emoji} ${c.title}` })),
               '— pick a course —')}

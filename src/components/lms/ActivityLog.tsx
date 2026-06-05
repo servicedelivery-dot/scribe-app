@@ -28,6 +28,7 @@ const ACTION_ICONS: Record<string, string> = {
   quiz_passed: '📝',
   certificate_earned: '🏅',
   user_created: '👤',
+  video_created: '🎬',
 }
 
 const ACTION_LABELS: Record<string, string> = {
@@ -118,7 +119,7 @@ export default function ActivityLog({ initialEntries }: { initialEntries: Activi
   }, [refresh])
 
   return (
-    <div className="p-8 min-h-screen" style={{ background: '#0d1b2e' }}>
+    <div className="p-4 sm:p-6 min-h-screen" style={{ background: '#0d1b2e' }}>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -138,7 +139,7 @@ export default function ActivityLog({ initialEntries }: { initialEntries: Activi
       </div>
 
       {/* Filter bar */}
-      <div className="flex gap-2 mb-6 flex-wrap">
+      <div className="flex gap-1 flex-wrap mb-6">
         {ACTION_FILTERS.map((f) => (
           <button
             key={f.value}

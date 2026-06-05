@@ -49,7 +49,7 @@ const sections: NavSection[] = [
   ]},
 ]
 
-export default function LmsSidebar({ role }: { role: Role }) {
+export default function LmsSidebar({ role, onNavigate }: { role: Role; onNavigate?: () => void }) {
   const pathname = usePathname()
 
   const visibleSections = sections
@@ -57,7 +57,7 @@ export default function LmsSidebar({ role }: { role: Role }) {
     .filter(sec => sec.links.length > 0)
 
   return (
-    <aside className="w-56 flex-shrink-0 flex flex-col" style={{ background: '#001228', borderRight: '1px solid #0d2545' }}>
+    <aside className="w-64 h-full flex-shrink-0 flex flex-col" style={{ background: '#001228', borderRight: '1px solid #0d2545' }}>
       <div className="p-4 border-b" style={{ borderColor: '#0d2545' }}>
         <Link href="/lms" className="flex items-center gap-2">
           <Image src="/logo.png" alt="Airportr" width={120} height={28} className="object-contain" />
@@ -71,7 +71,7 @@ export default function LmsSidebar({ role }: { role: Role }) {
             <p className="text-xs font-semibold uppercase tracking-wide px-3 mb-1" style={{ color: '#334155' }}>{sec.label}</p>
             <div className="space-y-0.5">
               {sec.links.map(l => (
-                <Link key={l.href} href={l.href}
+                <Link key={l.href} href={l.href} onClick={onNavigate}
                   className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors"
                   style={{
                     background: pathname === l.href ? 'rgba(0,60,166,0.25)' : 'transparent',

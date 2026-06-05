@@ -68,7 +68,7 @@ export default function QuizEditor({ courseId, lessonId }: { courseId: string; l
   if (loading) return <div className="py-6 text-center text-gray-500 text-sm">Loading...</div>
 
   return (
-    <div className="p-5 space-y-4">
+    <div className="p-4 sm:p-5 space-y-4">
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <h3 className="text-white font-medium text-sm">
           {lessonId ? 'Lesson Quiz' : 'End-of-Course Assessment'} — {questions.length} questions
@@ -94,7 +94,7 @@ export default function QuizEditor({ courseId, lessonId }: { courseId: string; l
 
       {/* AI Generate panel */}
       {lessonId && showAiDesc && (
-        <div className="rounded-xl p-4 space-y-3" style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.3)' }}>
+        <div className="rounded-xl p-3 sm:p-4 space-y-3" style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.3)' }}>
           <p className="text-xs font-semibold" style={{ color: '#a78bfa' }}>🤖 AI Quiz Generator</p>
           <p className="text-xs" style={{ color: '#64748b' }}>
             For Scribe / PDF / video lessons, add a brief description so AI knows what to test. For text lessons, it reads the content automatically.

@@ -18,6 +18,32 @@ body {
   background: #0A0F1E;
   color: #ffffff;
   font-family: 'DM Sans', system-ui, sans-serif;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Minimum touch target size for interactive elements */
+button, a, [role="button"] {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Override for table cells and inline elements */
+td button, th button, nav a, .inline-btn {
+  min-height: unset;
+  display: inline-flex;
+}
+
+/* Safe area support for iOS notch / home bar */
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+.safe-top    { padding-top:    env(safe-area-inset-top); }
+
+/* Smooth scrolling on iOS */
+.overflow-auto, .overflow-y-auto, .overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Custom scrollbar */

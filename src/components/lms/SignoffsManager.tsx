@@ -122,9 +122,9 @@ export default function SignoffsManager({
   ]
 
   return (
-    <div className="p-8 max-w-6xl">
+    <div className="p-4 sm:p-8 max-w-6xl">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-3">
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-2">
             <ClipboardCheck className="w-6 h-6" style={{ color: '#00A3E0' }} />
@@ -144,7 +144,7 @@ export default function SignoffsManager({
       </div>
 
       {/* Tab bar */}
-      <div className="flex gap-1 mb-6 border-b" style={{ borderColor: '#1e3a6e' }}>
+      <div className="flex gap-1 mb-6 border-b overflow-x-auto" style={{ borderColor: '#1e3a6e' }}>
         {tabs.map(tab => (
           <button
             key={tab.key}
@@ -173,8 +173,9 @@ export default function SignoffsManager({
           <p className="text-gray-500">No sign-off requests{activeTab !== 'all' ? ` with status "${activeTab}"` : ''}</p>
         </div>
       ) : (
-        <div className="rounded-xl overflow-hidden border" style={{ borderColor: '#1e3a6e' }}>
-          <table className="w-full text-sm">
+        <div className="overflow-x-auto -mx-4 sm:mx-0">
+        <div className="rounded-xl overflow-hidden border mx-4 sm:mx-0" style={{ borderColor: '#1e3a6e' }}>
+          <table className="w-full min-w-[650px] text-sm">
             <thead>
               <tr style={{ backgroundColor: '#0a1628', borderBottom: '1px solid #1e3a6e' }}>
                 <th className="text-left px-4 py-3 text-gray-400 font-medium">User</th>
@@ -240,12 +241,13 @@ export default function SignoffsManager({
             </tbody>
           </table>
         </div>
+        </div>
       )}
 
       {/* Confirm dialog */}
       {confirmId && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="rounded-xl p-6 w-full max-w-sm border" style={{ backgroundColor: '#0d1b2e', borderColor: '#1e3a6e' }}>
+          <div className="rounded-xl p-6 w-full max-w-sm mx-4 sm:mx-0 border" style={{ backgroundColor: '#0d1b2e', borderColor: '#1e3a6e' }}>
             <h2 className="text-white font-semibold mb-2">
               {confirmId.action === 'approved' ? 'Approve' : 'Reject'} Sign-off?
             </h2>
@@ -276,7 +278,7 @@ export default function SignoffsManager({
       {/* New Request Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="rounded-xl p-6 w-full max-w-md border" style={{ backgroundColor: '#0d1b2e', borderColor: '#1e3a6e' }}>
+          <div className="rounded-xl p-6 w-full max-w-md mx-4 sm:mx-0 border overflow-y-auto max-h-[90vh]" style={{ backgroundColor: '#0d1b2e', borderColor: '#1e3a6e' }}>
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-white font-semibold">New Sign-off Request</h2>
               <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-white">

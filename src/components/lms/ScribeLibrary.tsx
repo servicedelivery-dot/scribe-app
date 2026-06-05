@@ -192,7 +192,7 @@ export default function ScribeLibrary({ initialItems, courses }: { initialItems:
 
       {/* Floating action bar when items selected */}
       {selected.size > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 px-5 py-3 rounded-2xl shadow-2xl"
+        <div className="fixed bottom-6 left-4 right-4 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 z-40 flex items-center gap-3 px-5 py-3 rounded-2xl shadow-2xl"
           style={{ background: '#0d1b2e', border: `1px solid ${ap.border}` }}>
           <Layers className="w-5 h-5" style={{ color: ap.cyan }} />
           <span className="text-white text-sm font-semibold">{selected.size} guide{selected.size !== 1 ? 's' : ''} selected</span>
@@ -230,7 +230,7 @@ export default function ScribeLibrary({ initialItems, courses }: { initialItems:
                 key={preview.mode}
                 src={preview.mode === 'slides' ? preview.item.slidesUrl : preview.mode === 'movie' ? preview.item.movieUrl : preview.item.scrollUrl}
                 className="w-full h-full rounded-xl"
-                style={{ minHeight: '500px', border: 0 }}
+                style={{ minHeight: '300px', border: 0 }}
                 allow="fullscreen"
               />
             </div>

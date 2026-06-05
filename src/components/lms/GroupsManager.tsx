@@ -130,7 +130,7 @@ export default function GroupsManager({ initialGroups }: { initialGroups: Group[
   const availableCourses = allCourses.filter(c => !inGroupIds.has(c.id))
 
   return (
-    <div className="p-8" style={{ color: '#e2e8f0' }}>
+    <div className="p-4 sm:p-8" style={{ color: '#e2e8f0' }}>
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
@@ -208,7 +208,7 @@ export default function GroupsManager({ initialGroups }: { initialGroups: Group[
       {showNewModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div
-            className="w-full max-w-md rounded-2xl border p-6 shadow-2xl"
+            className="w-full max-w-md mx-4 sm:mx-0 rounded-2xl border p-6 shadow-2xl"
             style={{ background: '#0d1b2e', borderColor: '#1e3a6e' }}
           >
             <div className="flex items-center justify-between mb-5">
@@ -297,7 +297,7 @@ export default function GroupsManager({ initialGroups }: { initialGroups: Group[
             onClick={() => setSelectedGroup(null)}
           />
           <div
-            className="relative w-full max-w-lg h-full border-l flex flex-col shadow-2xl overflow-hidden"
+            className="relative w-full sm:max-w-lg h-full sm:border-l flex flex-col shadow-2xl overflow-hidden"
             style={{ background: '#0d1b2e', borderColor: '#1e3a6e' }}
           >
             {/* Slide-over header */}

@@ -44,8 +44,79 @@ export default function VideoOverview({ projectId, projectTitle }: Props) {
   const [progress, setProgress] = useState('')
   const [videoUrl, setVideoUrl] = useState<string | null>(null)
   const [audioAvailable, setAudioAvailable] = useState(true)
+  // Add to course
+  const [courses, setCourses] = useState<{id:string;title:string;emoji:string}[]>([])
+  const [modules, setModules] = useState<{id:string;title:string;courseId:string}[]>([])
+  const [addCourseId, setAddCourseId] = useState('')
+  const [addModuleId, setAddModuleId] = useState('')
+  const [addingToCourse, setAddingToCourse] = useState(false)
+  const [addedMsg, setAddedMsg] = useState('')
+  const [videoBlob, setVideoBlob] = useState<Blob | null>(null)
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  // Fetch courses when modal opens
+  async function loadCourses() {
+    const [c, m] = await Promise.all([
+      fetch('/api/lms/courses').then(r => r.json()).catch(() => []),
+      fetch('/api/lms/modules').then(r => r.json()).catch(() => []),
+    ])
+    setCourses(Array.isArray(c) ? c : [])
+    setModules(Array.isArray(m) ? m : [])
+  }
+
+  // Upload blob + create video lesson
+  async function addToCourse() {
+    if (!addCourseId || !addModuleId || !videoBlob) return
+    setAddingToCourse(true)
+    setAddedMsg('')
+    try {
+      // Upload via UploadThing
+      const formData = new FormData()
+      formData.append('file', videoBlob, `${projectTitle.replace(/\s+/g,'-')}-overview.webm`)
+      let uploadedUrl = ''
+      try {
+        const up = await fetch('/api/uploadthing', { method: 'POST', body: formData })
+        const upData = await up.json()
+        uploadedUrl = upData?.url || upData?.[0]?.url || ''
+      } catch { /* upload failed, use object URL as fallback */ uploadedUrl = videoUrl || '' }
+
+      // Create lesson
+      const res = await fetch('/api/lms/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'video',
+          title: `${projectTitle} — Video Overview`,
+          courseId: addCourseId,
+          moduleId: addModuleId,
+          content: '',
+          fileUrl: uploadedUrl,
+          fileName: `${projectTitle}-overview.webm`,
+          generateQuiz: false,
+        }),
+      })
+      const data = await res.json()
+      if (data.error) throw new Error(data.error)
+
+      // Log to activity
+      await fetch('/api/lms/activity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'video_created',
+          entityType: 'lesson',
+          entityId: data.lesson?.id,
+          entityName: `${projectTitle} — Video Overview`,
+        }),
+      }).catch(() => {})
+
+      setAddedMsg(`✓ Added to course as a video lesson!`)
+    } catch (e: unknown) {
+      setAddedMsg(`Error: ${e instanceof Error ? e.message : 'Failed'}`)
+    }
+    setAddingToCourse(false)
+  }
 
   // ── Script ──────────────────────────────────────────────────────────────────
   async function generateScript() {
@@ -318,8 +389,15 @@ export default function VideoOverview({ projectId, projectTitle }: Props) {
     muxer.finalize()
 
     const blob = new Blob([target.buffer], { type: 'video/webm' })
+    setVideoBlob(blob)
     setVideoUrl(URL.createObjectURL(blob))
     setStage('done')
+    // Log video creation to activity feed
+    fetch('/api/lms/activity', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'video_created', entityType: 'project', entityId: projectId, entityName: projectTitle }),
+    }).catch(() => {})
   }
 
   function downloadVideo() {
@@ -462,8 +540,51 @@ export default function VideoOverview({ projectId, projectTitle }: Props) {
                       <Download className="w-4 h-4" /> Download .webm
                     </button>
                   </div>
+
+                  {/* ── Add to Course ── */}
+                  <div className="rounded-xl p-4 space-y-3" style={{ background: '#091525', border: '1px solid #1e3a6e' }}>
+                    <p className="text-sm font-semibold text-white flex items-center gap-2">
+                      📚 Add to a Course
+                    </p>
+                    <p className="text-xs" style={{ color: '#475569' }}>
+                      Save this video as a lesson — learners can watch it with progress tracking.
+                    </p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-xs block mb-1" style={{ color: '#64748b' }}>Course</label>
+                        <select value={addCourseId}
+                          onChange={e => { setAddCourseId(e.target.value); setAddModuleId('') }}
+                          onFocus={loadCourses}
+                          className="w-full px-2 py-2 text-xs text-white rounded-lg focus:outline-none"
+                          style={{ background: '#0d1b2e', border: '1px solid #1e3a6e' }}>
+                          <option value="">— pick course —</option>
+                          {courses.map(c => <option key={c.id} value={c.id}>{c.emoji} {c.title}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-xs block mb-1" style={{ color: '#64748b' }}>Module</label>
+                        <select value={addModuleId} onChange={e => setAddModuleId(e.target.value)}
+                          className="w-full px-2 py-2 text-xs text-white rounded-lg focus:outline-none"
+                          style={{ background: '#0d1b2e', border: '1px solid #1e3a6e' }}>
+                          <option value="">— pick module —</option>
+                          {modules.filter(m => m.courseId === addCourseId).map(m => <option key={m.id} value={m.id}>{m.title}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                    <button onClick={addToCourse} disabled={!addCourseId || !addModuleId || addingToCourse}
+                      className="w-full py-2 rounded-lg text-sm font-semibold text-white disabled:opacity-40 flex items-center justify-center gap-2"
+                      style={{ background: '#003CA6' }}>
+                      {addingToCourse ? <><Loader2 className="w-4 h-4 animate-spin" />Adding...</> : '📥 Add Video to Course'}
+                    </button>
+                    {addedMsg && (
+                      <p className="text-xs text-center" style={{ color: addedMsg.startsWith('Error') ? '#f87171' : '#86efac' }}>
+                        {addedMsg}
+                      </p>
+                    )}
+                  </div>
+
                   <p className="text-xs text-center" style={{ color: '#334155' }}>
-                    .webm plays in Chrome, Firefox, Edge, VLC. To convert to .mp4 use <a href="https://www.handbrake.fr" target="_blank" className="underline" style={{ color: '#00A3E0' }}>Handbrake</a> (free).
+                    .webm plays in Chrome, Firefox, Edge, VLC. Convert to .mp4 with <a href="https://www.handbrake.fr" target="_blank" className="underline" style={{ color: '#00A3E0' }}>Handbrake</a>.
                   </p>
                 </div>
               )}

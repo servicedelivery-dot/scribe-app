@@ -110,9 +110,9 @@ export default function CourseEditor({ course, initialModules }: Props) {
   }
 
   return (
-    <div className="flex h-screen bg-gray-950">
+    <div className="flex flex-col lg:flex-row h-screen bg-gray-950">
       {/* Left: structure panel */}
-      <div className="w-72 flex-shrink-0 border-r border-gray-800 bg-gray-900 flex flex-col">
+      <div className="w-full lg:w-72 flex-shrink-0 border-b lg:border-b-0 lg:border-r border-gray-800 bg-gray-900 flex flex-col h-auto lg:h-full max-h-64 lg:max-h-full overflow-y-auto lg:overflow-visible">
         <div className="p-4 border-b border-gray-800">
           <Link href="/lms/manage" className="flex items-center gap-1 text-gray-400 hover:text-white text-xs mb-3 transition-colors">
             <ArrowLeft className="w-3 h-3" /> All courses
@@ -215,7 +215,7 @@ export default function CourseEditor({ course, initialModules }: Props) {
       </div>
 
       {/* Right: lesson editor */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-h-0">
         {activeLesson ? (
           <>
             <div className="h-14 bg-gray-900 border-b border-gray-800 flex items-center justify-between px-5">
@@ -271,11 +271,11 @@ export default function CourseEditor({ course, initialModules }: Props) {
                 }
 
                 return (
-                  <div className="flex-1 flex overflow-hidden">
+                  <div className="flex-1 flex flex-col sm:flex-row overflow-hidden">
                     <textarea value={lessonContent} onChange={e => setLessonContent(e.target.value)}
                       placeholder="Write lesson content in Markdown..."
-                      className="w-1/2 h-full bg-gray-950 text-gray-300 text-sm p-6 resize-none focus:outline-none border-r border-gray-800 font-mono leading-relaxed" />
-                    <div className="w-1/2 overflow-y-auto p-6">
+                      className="w-full sm:w-1/2 h-48 sm:h-full bg-gray-950 text-gray-300 text-sm p-6 resize-none focus:outline-none border-b sm:border-b-0 sm:border-r border-gray-800 font-mono leading-relaxed" />
+                    <div className="w-full sm:w-1/2 overflow-y-auto p-6">
                       <article className="prose prose-invert prose-headings:text-white prose-p:text-gray-300 prose-li:text-gray-300 prose-strong:text-white prose-code:text-violet-300 max-w-none text-sm">
                         <ReactMarkdown>{lessonContent || '*Start writing to see a preview...*'}</ReactMarkdown>
                       </article>

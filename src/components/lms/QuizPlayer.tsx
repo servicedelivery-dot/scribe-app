@@ -41,7 +41,7 @@ export default function QuizPlayer({ questions, courseId, lessonId, onComplete }
   if (result) {
     return (
       <div className="mt-6 bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
-        <div className={`p-5 ${result.passed ? 'bg-green-900/20 border-b border-green-800/30' : 'bg-red-900/20 border-b border-red-800/30'}`}>
+        <div className={`p-4 sm:p-5 ${result.passed ? 'bg-green-900/20 border-b border-green-800/30' : 'bg-red-900/20 border-b border-red-800/30'}`}>
           <div className="flex items-center gap-3 mb-2">
             {result.passed
               ? <CheckCircle className="w-6 h-6 text-green-400" />
@@ -97,14 +97,14 @@ export default function QuizPlayer({ questions, courseId, lessonId, onComplete }
         <h3 className="text-white font-semibold">Quiz — {questions.length} questions</h3>
         <span className="text-xs text-gray-500">70% to pass</span>
       </div>
-      <div className="p-5 space-y-5">
+      <div className="p-4 sm:p-5 space-y-5">
         {questions.map((q, qi) => (
           <div key={q.id}>
             <p className="text-white text-sm font-medium mb-3">{qi + 1}. {q.question}</p>
             <div className="space-y-2">
               {q.options.map((opt, oi) => (
                 <button key={oi} onClick={() => setAnswers(prev => prev.map((a, i) => i === qi ? oi : a))}
-                  className={`w-full text-left px-4 py-2.5 rounded-xl text-sm transition-colors border ${answers[qi] === oi ? 'border-violet-500 bg-violet-600/20 text-violet-200' : 'border-gray-700 text-gray-400 hover:border-gray-600 hover:text-white'}`}>
+                  className={`w-full text-left px-4 py-2.5 min-h-[44px] rounded-xl text-sm transition-colors border ${answers[qi] === oi ? 'border-violet-500 bg-violet-600/20 text-violet-200' : 'border-gray-700 text-gray-400 hover:border-gray-600 hover:text-white'}`}>
                   <span className="inline-flex w-5 h-5 rounded-full border border-current items-center justify-center text-xs mr-2 flex-shrink-0">
                     {String.fromCharCode(65 + oi)}
                   </span>

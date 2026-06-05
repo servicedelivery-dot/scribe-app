@@ -56,7 +56,7 @@ export default function ProfileClient({ clerkUser, profile, role, stats, assigne
   const roleStyle = ROLE_STYLE[role] ?? ROLE_STYLE.learner
 
   return (
-    <div className="p-8 max-w-4xl">
+    <div className="p-4 sm:p-8 max-w-4xl">
       {/* Header */}
       <div className="flex items-center gap-5 mb-8">
         <img src={clerkUser.imageUrl} alt="" className="w-16 h-16 rounded-full bg-gray-700 flex-shrink-0" />

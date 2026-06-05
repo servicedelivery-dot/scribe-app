@@ -211,9 +211,9 @@ export default function UserManagement({ initialUsers, currentRole }: { initialU
   )
 
   return (
-    <div className="p-8 max-w-6xl">
+    <div className="p-4 sm:p-8 max-w-6xl">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-3">
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-2">
             <Users className="w-6 h-6" style={{ color: ap.cyan }} /> User Management
@@ -222,7 +222,7 @@ export default function UserManagement({ initialUsers, currentRole }: { initialU
             {users.length} users · create accounts or invite users to set up their own
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <button
             onClick={() => { setShowInvite(true); setInviteMsg(null) }}
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-colors"
@@ -249,8 +249,8 @@ export default function UserManagement({ initialUsers, currentRole }: { initialU
       </div>
 
       {/* Filters */}
-      <div className="flex items-center gap-3 mb-5">
-        <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-wrap items-center gap-3 mb-5">
+        <div className="relative flex-1 max-w-sm min-w-[160px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#475569' }} />
           <input
             value={search} onChange={e => setSearch(e.target.value)}
@@ -259,7 +259,7 @@ export default function UserManagement({ initialUsers, currentRole }: { initialU
             style={{ background: ap.bg, border: `1px solid ${ap.border}` }}
           />
         </div>
-        <div className="flex gap-1">
+        <div className="flex flex-wrap gap-1">
           {(['all', 'admin', 'manager', 'learner'] as const).map(r => (
             <button key={r} onClick={() => setRoleFilter(r)}
               className="px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors"
@@ -271,8 +271,9 @@ export default function UserManagement({ initialUsers, currentRole }: { initialU
       </div>
 
       {/* Table */}
-      <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${ap.border}` }}>
-        <table className="w-full">
+      <div className="overflow-x-auto -mx-4 sm:mx-0">
+      <div className="rounded-xl overflow-hidden mx-4 sm:mx-0" style={{ border: `1px solid ${ap.border}` }}>
+        <table className="w-full min-w-[700px]">
           <thead>
             <tr style={{ borderBottom: `1px solid ${ap.border}`, background: '#091525' }}>
               {['User', 'Role', 'Enrolled', 'Certs', 'Joined', 'Temp Password', ...(currentRole === 'owner' ? [''] : [])].map((h, i) => (
@@ -372,11 +373,12 @@ export default function UserManagement({ initialUsers, currentRole }: { initialU
         </table>
         {filtered.length === 0 && <div className="text-center py-10" style={{ color: '#334155' }}>No users found</div>}
       </div>
+      </div>
 
       {/* Invite User modal */}
       {showInvite && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="rounded-2xl w-full max-w-md" style={{ background: '#080f1e', border: `1px solid ${ap.border}` }}>
+          <div className="rounded-2xl w-full max-w-md mx-4 sm:mx-auto overflow-y-auto max-h-[90vh]" style={{ background: '#080f1e', border: `1px solid ${ap.border}` }}>
             <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: ap.border }}>
               <div>
                 <h2 className="text-white font-semibold text-lg">Invite User</h2>
@@ -477,7 +479,7 @@ export default function UserManagement({ initialUsers, currentRole }: { initialU
       {/* Create User modal */}
       {showCreate && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="rounded-2xl w-full max-w-lg my-4" style={{ background: '#080f1e', border: `1px solid ${ap.border}` }}>
+          <div className="rounded-2xl w-full max-w-lg mx-4 sm:mx-auto my-4 overflow-y-auto max-h-[90vh]" style={{ background: '#080f1e', border: `1px solid ${ap.border}` }}>
             <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: ap.border }}>
               <h2 className="text-white font-semibold text-lg">Create User</h2>
               <button onClick={() => setShowCreate(false)} className="text-gray-500 hover:text-white"><X className="w-5 h-5" /></button>

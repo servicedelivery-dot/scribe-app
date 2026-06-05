@@ -89,7 +89,7 @@ export default function CalendarView({ assignments }: Props) {
   }
 
   return (
-    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
+    <div className="flex flex-col lg:flex-row gap-6 items-start">
       {/* Calendar */}
       <div style={{ flex: 1, background: '#0f2540', border: '1px solid #1e3a6e', borderRadius: 12, padding: '1.5rem' }}>
         {/* Header */}
@@ -136,8 +136,9 @@ export default function CalendarView({ assignments }: Props) {
             let border = '1px solid transparent'
             if (todayCell && !selected) border = '1px solid #00A3E0'
 
-            const visible = dayAssignments.slice(0, 3)
-            const overflow = dayAssignments.length - 3
+            const maxVisible = typeof window !== 'undefined' && window.innerWidth < 640 ? 1 : 3
+            const visible = dayAssignments.slice(0, maxVisible)
+            const overflow = dayAssignments.length - maxVisible
 
             return (
               <div
@@ -147,8 +148,8 @@ export default function CalendarView({ assignments }: Props) {
                   background: bg,
                   border,
                   borderRadius: 8,
-                  padding: '0.35rem 0.3rem',
-                  minHeight: 72,
+                  padding: '0.25rem 0.2rem',
+                  minHeight: 56,
                   cursor: 'pointer',
                   position: 'relative',
                   transition: 'background 0.15s',
@@ -194,13 +195,11 @@ export default function CalendarView({ assignments }: Props) {
 
       {/* Side panel */}
       {selectedDay !== null && (
-        <div style={{
-          width: 300,
+        <div className="w-full lg:w-72 flex-shrink-0" style={{
           background: '#0f2540',
           border: '1px solid #1e3a6e',
           borderRadius: 12,
           padding: '1.25rem',
-          flexShrink: 0,
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <h3 style={{ margin: 0, fontWeight: 700, color: '#ffffff', fontSize: '1rem' }}>

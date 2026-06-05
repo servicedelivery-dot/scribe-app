@@ -110,7 +110,7 @@ export default function QuizResults({ courseId }: { courseId: string }) {
               {/* Row header */}
               <button
                 onClick={() => setExpanded(expanded === a.id ? null : a.id)}
-                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left transition-colors hover:bg-gray-800/30"
+                className="w-full flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 px-4 py-3 text-sm text-left transition-colors hover:bg-gray-800/30"
                 style={{ background: '#091525' }}
               >
                 {/* Expand icon */}
@@ -155,7 +155,7 @@ export default function QuizResults({ courseId }: { courseId: string }) {
                           : <XCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />}
                         <p className="text-white text-sm font-medium">{i + 1}. {b.question}</p>
                       </div>
-                      <div className="grid grid-cols-2 gap-1.5 ml-6">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 ml-6">
                         {b.options.map((opt, oi) => {
                           const isCorrect = oi === b.correctIndex
                           const isUser = oi === b.userAnswer

@@ -30,7 +30,7 @@ interface Props {
 
 function KpiCard({ label, value, sub, icon, color }: { label: string; value: string | number; sub?: string; icon: React.ReactNode; color: string }) {
   return (
-    <div className={`bg-gray-900 border border-gray-800 rounded-xl p-5`}>
+    <div className={`bg-gray-900 border border-gray-800 rounded-xl p-4 sm:p-5`}>
       <div className="flex items-start justify-between mb-3">
         <p className="text-gray-400 text-xs font-semibold uppercase tracking-wide">{label}</p>
         <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${color}`}>{icon}</div>
@@ -83,7 +83,7 @@ export default function AnalyticsDashboard({ data }: Props) {
   const { kpis, enrollmentsByDay, topCourses } = data
 
   return (
-    <div className="p-8 max-w-6xl">
+    <div className="p-4 sm:p-6 max-w-6xl">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-white flex items-center gap-2">
           <TrendingUp className="w-6 h-6 text-violet-400" /> Analytics
@@ -105,7 +105,7 @@ export default function AnalyticsDashboard({ data }: Props) {
         {/* Enrollment chart */}
         <div className="lg:col-span-2 bg-gray-900 border border-gray-800 rounded-xl p-5">
           <h3 className="text-white font-semibold mb-4">Enrollments (last 30 days)</h3>
-          <BarChart data={enrollmentsByDay} />
+          <div className="overflow-x-auto"><BarChart data={enrollmentsByDay} /></div>
           {enrollmentsByDay.length > 0 && (
             <div className="flex justify-between mt-2 text-xs text-gray-600">
               <span>{enrollmentsByDay[0]?.day}</span>

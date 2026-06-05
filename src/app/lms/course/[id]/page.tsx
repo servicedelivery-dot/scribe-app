@@ -51,13 +51,13 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
   const pct = lessons.length > 0 ? Math.round(completedIds.size / lessons.length * 100) : 0
 
   return (
-    <div className="max-w-3xl mx-auto p-8">
+    <div className="max-w-3xl mx-auto p-4 sm:p-8">
       {/* Header */}
       <div className="text-6xl mb-4">{course.emoji}</div>
       <h1 className="text-3xl font-bold text-white mb-2">{course.title}</h1>
       {course.description && <p className="text-gray-400 mb-4">{course.description}</p>}
 
-      <div className="flex items-center gap-6 text-sm text-gray-500 mb-6">
+      <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 mb-6">
         <span className="flex items-center gap-1.5"><BookOpen className="w-4 h-4" />{lessons.length} lesson{lessons.length !== 1 ? 's' : ''}</span>
         {endQuizCount > 0 && <span className="flex items-center gap-1.5">📝 Final assessment</span>}
         <span className="flex items-center gap-1.5"><Users className="w-4 h-4" />{enrollCount.count} enrolled</span>

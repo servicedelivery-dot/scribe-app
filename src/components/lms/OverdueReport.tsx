@@ -86,7 +86,7 @@ export default function OverdueReport({ assignments }: Props) {
   return (
     <div>
       {/* Toolbar */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
+      <div className="flex flex-col sm:flex-row gap-3 mb-5" style={{ marginBottom: '1.25rem' }}>
         {/* Count badge */}
         <div style={{
           background: '#7f1d1d',
@@ -140,8 +140,9 @@ export default function OverdueReport({ assignments }: Props) {
       </div>
 
       {/* Table */}
+      <div className="overflow-x-auto -mx-0">
       <div style={{ background: '#0f2540', border: '1px solid #1e3a6e', borderRadius: 12, overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <table style={{ width: '100%', minWidth: 600, borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ background: '#0d2d52', borderBottom: '1px solid #1e3a6e' }}>
               {['User', 'Course', 'Due Date', 'Days Overdue', 'Status'].map((h) => (
@@ -236,6 +237,7 @@ export default function OverdueReport({ assignments }: Props) {
             )}
           </tbody>
         </table>
+      </div>
       </div>
     </div>
   )
