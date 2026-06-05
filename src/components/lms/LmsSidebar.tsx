@@ -65,7 +65,7 @@ export default function LmsSidebar({ role, onNavigate }: { role: Role; onNavigat
         <p className="text-xs mt-1.5" style={{ color: '#00A3E0' }}>Academy</p>
       </div>
 
-      <nav className="flex-1 p-3 space-y-4 overflow-y-auto">
+      <nav className="flex-1 p-3 space-y-4 overflow-y-auto no-scrollbar">
         {visibleSections.map(sec => (
           <div key={sec.label}>
             <p className="text-xs font-semibold uppercase tracking-wide px-3 mb-1" style={{ color: '#334155' }}>{sec.label}</p>

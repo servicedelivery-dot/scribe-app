@@ -23,31 +23,35 @@ body {
   touch-action: manipulation;
 }
 
-/* Minimum touch target size for interactive elements */
-button, a, [role="button"] {
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+/* Mobile touch targets — ONLY on touch devices, ONLY on primary action buttons */
+@media (hover: none) and (pointer: coarse) {
+  .btn-touch {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }
 
-/* Override for table cells and inline elements */
-td button, th button, nav a, .inline-btn {
-  min-height: unset;
-  display: inline-flex;
+/* Safe area — iOS notch + home bar */
+.pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
+.pt-safe { padding-top:    env(safe-area-inset-top,    0px); }
+.pl-safe { padding-left:   env(safe-area-inset-left,   0px); }
+.pr-safe { padding-right:  env(safe-area-inset-right,  0px); }
+
+/* iOS smooth momentum scroll */
+.scroll-touch { -webkit-overflow-scrolling: touch; }
+
+/* Custom scrollbar — desktop only (hidden on mobile) */
+@media (hover: hover) {
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #0f172a; }
+  ::-webkit-scrollbar-thumb { background: #1e3a6e; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #2d5299; }
 }
 
-/* Safe area support for iOS notch / home bar */
-.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
-.safe-top    { padding-top:    env(safe-area-inset-top); }
+/* Horizontal scroll containers */
+.overflow-x-auto { -webkit-overflow-scrolling: touch; }
+.overflow-y-auto { -webkit-overflow-scrolling: touch; }
 
-/* Smooth scrolling on iOS */
-.overflow-auto, .overflow-y-auto, .overflow-x-auto {
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #0f172a; }
-::-webkit-scrollbar-thumb { background: #1e3a6e; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #2d5299; }
+/* Hide scrollbar on mobile nav elements */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
