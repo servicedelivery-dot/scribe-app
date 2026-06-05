@@ -1,8 +1,15 @@
+import { auth } from '@clerk/nextjs/server'
+import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { GraduationCap, Sparkles, FileText, Users } from 'lucide-react'
 
-export default function Home() {
+export default async function Home() {
+  const { userId } = await auth()
+
+  // Already signed in — skip the landing page
+  if (userId) redirect('/lms')
+
   return (
     <div className="min-h-screen relative flex flex-col items-center justify-center p-8 text-center overflow-hidden">
       {/* Background */}
@@ -43,12 +50,6 @@ export default function Home() {
             style={{ background: '#003CA6' }}
           >
             Sign in
-          </Link>
-          <Link href="/lms"
-            className="px-8 py-3 text-white rounded-xl font-semibold transition-colors border"
-            style={{ background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.15)' }}
-          >
-            Go to Academy
           </Link>
         </div>
       </div>
