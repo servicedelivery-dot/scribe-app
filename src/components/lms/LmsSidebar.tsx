@@ -2,23 +2,20 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, BookOpen, BarChart2, Users, Award, Megaphone, TrendingUp, GraduationCap, UserCircle, Library, Layers, Calendar, AlertTriangle, ClipboardCheck, Activity, Search, Upload, BarChart, Star, Bell, Route, Settings } from 'lucide-react'
+import { useUser } from '@clerk/nextjs'
+import {
+  LayoutDashboard, BookOpen, BarChart2, Users, Award, Megaphone, TrendingUp,
+  GraduationCap, UserCircle, Library, Layers, Calendar, AlertTriangle,
+  ClipboardCheck, Activity, Upload, BarChart, Star, Bell, Route, Settings,
+  ChevronLeft, ChevronRight,
+} from 'lucide-react'
 import { UserButton } from '@clerk/nextjs'
 import Image from 'next/image'
 
 type Role = 'owner' | 'admin' | 'manager' | 'learner'
 
-interface NavLink {
-  href: string
-  icon: React.ReactNode
-  label: string
-  roles: Role[]
-}
-
-interface NavSection {
-  label: string
-  links: NavLink[]
-}
+interface NavLink { href: string; icon: React.ReactNode; label: string; roles: Role[] }
+interface NavSection { label: string; links: NavLink[] }
 
 const sections: NavSection[] = [
   { label: 'Overview', links: [
@@ -55,70 +52,174 @@ const sections: NavSection[] = [
   ]},
 ]
 
-const STANDALONE_LMS_URL = process.env.NEXT_PUBLIC_STANDALONE_LMS_URL || ''
+const ROLE_COLOR: Record<Role, string> = {
+  owner: '#d8b4fe',
+  admin: '#fca5a5',
+  manager: '#93c5fd',
+  learner: '#94a3b8',
+}
+const ROLE_BG: Record<Role, string> = {
+  owner: 'rgba(168,85,247,0.12)',
+  admin: 'rgba(239,68,68,0.12)',
+  manager: 'rgba(59,130,246,0.12)',
+  learner: 'rgba(100,116,139,0.15)',
+}
 
-export default function LmsSidebar({ role, onNavigate }: { role: Role; onNavigate?: () => void }) {
+
+export default function LmsSidebar({
+  role,
+  collapsed,
+  onToggle,
+  onNavigate,
+}: {
+  role: Role
+  collapsed: boolean
+  onToggle: () => void
+  onNavigate?: () => void
+}) {
   const pathname = usePathname()
+  const { user } = useUser()
 
   const visibleSections = sections
     .map(sec => ({ ...sec, links: sec.links.filter(l => l.roles.includes(role)) }))
     .filter(sec => sec.links.length > 0)
 
+  function isActive(href: string) {
+    if (href === '/lms') return pathname === '/lms'
+    return pathname === href || pathname.startsWith(href + '/')
+  }
+
   return (
-    <aside className="w-64 h-full flex-shrink-0 flex flex-col" style={{ background: '#001228', borderRight: '1px solid #0d2545' }}>
-      <div className="p-4 border-b" style={{ borderColor: '#0d2545' }}>
-        <Link href="/lms" className="flex items-center gap-2">
-          <Image src="/logo.png" alt="Airportr" width={120} height={28} className="object-contain" />
-        </Link>
-        <p className="text-xs mt-1.5" style={{ color: '#00A3E0' }}>Academy</p>
+    <aside
+      className="h-full flex flex-col overflow-hidden transition-all duration-300 ease-in-out"
+      style={{
+        width: collapsed ? 64 : 240,
+        background: '#070f1d',
+        borderRight: '1px solid #152035',
+      }}
+    >
+      {/* Header — logo + collapse toggle */}
+      <div
+        className="flex items-center flex-shrink-0"
+        style={{ height: 56, borderBottom: '1px solid #152035', padding: '0 14px', gap: 8 }}
+      >
+        {collapsed ? (
+          /* Collapsed: full row is the expand button */
+          <button
+            onClick={onToggle}
+            className="hidden lg:flex w-full items-center justify-center rounded-lg transition-colors hover:bg-white/6"
+            style={{ height: 36, color: '#4e6680' }}
+            aria-label="Expand sidebar"
+            title="Expand sidebar"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        ) : (
+          /* Expanded: logo on left, collapse button on right */
+          <>
+            <Link
+              href="/lms"
+              onClick={onNavigate}
+              className="flex items-center flex-1 min-w-0"
+            >
+              <div className="relative" style={{ width: 130, height: 40 }}>
+                <Image src="/logo.png" alt="Airportr Academy" fill className="object-contain object-left" />
+              </div>
+            </Link>
+
+            <button
+              onClick={onToggle}
+              className="hidden lg:flex flex-shrink-0 items-center justify-center w-7 h-7 rounded-lg transition-colors hover:bg-white/6"
+              style={{ color: '#334155' }}
+              aria-label="Collapse sidebar"
+              title="Collapse sidebar"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+          </>
+        )}
       </div>
 
-      <nav className="flex-1 p-3 space-y-4 overflow-y-auto no-scrollbar">
-        {visibleSections.map(sec => (
-          <div key={sec.label}>
-            <p className="text-xs font-semibold uppercase tracking-wide px-3 mb-1" style={{ color: '#334155' }}>{sec.label}</p>
+      {/* Nav */}
+      <nav className="flex-1 overflow-y-auto no-scrollbar" style={{ padding: collapsed ? '12px 8px' : '12px 8px' }}>
+        {visibleSections.map((sec, si) => (
+          <div key={sec.label} className={si > 0 ? 'mt-5' : ''}>
+            {/* Section label */}
+            {!collapsed && (
+              <p
+                className="text-[10px] font-bold uppercase tracking-widest mb-1.5"
+                style={{ color: '#283d5e', paddingLeft: 10 }}
+              >
+                {sec.label}
+              </p>
+            )}
+            {collapsed && si > 0 && (
+              <div className="my-3 mx-1" style={{ height: 1, background: '#152035' }} />
+            )}
+
             <div className="space-y-0.5">
-              {sec.links.map(l => (
-                <Link key={l.href} href={l.href} onClick={onNavigate}
-                  className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors"
-                  style={{
-                    background: pathname === l.href ? 'rgba(0,60,166,0.25)' : 'transparent',
-                    color: pathname === l.href ? '#00A3E0' : '#94a3b8',
-                  }}>
-                  {l.icon}{l.label}
-                </Link>
-              ))}
+              {sec.links.map(l => {
+                const active = isActive(l.href)
+                return (
+                  <Link
+                    key={l.href}
+                    href={l.href}
+                    onClick={onNavigate}
+                    title={collapsed ? l.label : undefined}
+                    className="flex items-center gap-3 rounded-lg text-sm font-medium transition-all duration-150 group"
+                    style={{
+                      padding: collapsed ? '8px 0' : '7px 10px',
+                      justifyContent: collapsed ? 'center' : 'flex-start',
+                      background: active ? 'rgba(0,163,224,0.09)' : 'transparent',
+                      color: active ? '#e2e8f0' : '#4e6680',
+                      borderLeft: active && !collapsed ? '2px solid #00A3E0' : '2px solid transparent',
+                      marginLeft: collapsed ? 0 : 0,
+                    }}
+                  >
+                    <span style={{ color: active ? '#00A3E0' : '#4e6680', flexShrink: 0 }}
+                      className="transition-colors group-hover:!text-[#94a3b8]">
+                      {l.icon}
+                    </span>
+                    {!collapsed && (
+                      <span className="truncate transition-colors group-hover:text-[#cbd5e1]"
+                        style={{ color: active ? '#f1f5f9' : '#4e6680' }}>
+                        {l.label}
+                      </span>
+                    )}
+                  </Link>
+                )
+              })}
             </div>
           </div>
         ))}
+
       </nav>
 
-      {/* Standalone LMS cross-link — visible when env var is set */}
-      {STANDALONE_LMS_URL && (
-        <div className="px-3 pb-2">
-          <a
-            href={STANDALONE_LMS_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs w-full transition-colors hover:bg-white/5"
-            style={{ color: '#475569', border: '1px dashed #1e3a6e' }}
-          >
-            <span>📄</span>
-            <span className="flex-1">Standalone LMS</span>
-            <span style={{ fontSize: 10 }}>↗</span>
-          </a>
-        </div>
-      )}
-
-      <div className="p-4 border-t flex items-center gap-3" style={{ borderColor: '#0d2545' }}>
+      {/* User section */}
+      <div
+        className="flex items-center flex-shrink-0"
+        style={{
+          borderTop: '1px solid #152035',
+          padding: collapsed ? '12px 0' : '12px 14px',
+          gap: 10,
+          justifyContent: collapsed ? 'center' : 'flex-start',
+          minHeight: 60,
+        }}
+      >
         <UserButton appearance={{ elements: { userButtonAvatarBox: 'w-8 h-8' } }} />
-        <span className="text-xs capitalize px-2 py-0.5 rounded-full font-medium"
-          style={{
-            background: role === 'owner' ? 'rgba(168,85,247,0.15)' : role === 'admin' ? 'rgba(239,68,68,0.15)' : role === 'manager' ? 'rgba(59,130,246,0.15)' : 'rgba(100,116,139,0.2)',
-            color: role === 'owner' ? '#d8b4fe' : role === 'admin' ? '#fca5a5' : role === 'manager' ? '#93c5fd' : '#94a3b8',
-          }}>
-          {role}
-        </span>
+        {!collapsed && (
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium truncate" style={{ color: '#e2e8f0' }}>
+              {user?.fullName || user?.emailAddresses?.[0]?.emailAddress || '—'}
+            </p>
+            <span
+              className="text-xs capitalize font-medium px-1.5 py-0.5 rounded-md"
+              style={{ background: ROLE_BG[role], color: ROLE_COLOR[role] }}
+            >
+              {role}
+            </span>
+          </div>
+        )}
       </div>
     </aside>
   )

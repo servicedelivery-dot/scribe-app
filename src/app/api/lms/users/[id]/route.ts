@@ -4,6 +4,49 @@ import { db } from '@/lib/db'
 import { lmsUserRoles, lmsUserProfiles, lmsEnrollments, lmsCourseAssignments, lmsProgress, lmsQuizAttempts, lmsCertificates } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { userId } = await auth()
+  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const [requester] = await db.select().from(lmsUserRoles).where(eq(lmsUserRoles.userId, userId))
+  if (!['owner', 'admin'].includes(requester?.role ?? '')) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
+  const { id: targetId } = await params
+  const { displayName, role, department, jobTitle, phone, notes } = await req.json()
+
+  // Update role + displayName in lmsUserRoles
+  const existingRole = await db.select().from(lmsUserRoles).where(eq(lmsUserRoles.userId, targetId))
+  if (existingRole.length) {
+    await db.update(lmsUserRoles).set({ ...(role && { role }), ...(displayName !== undefined && { displayName }) }).where(eq(lmsUserRoles.userId, targetId))
+  } else {
+    await db.insert(lmsUserRoles).values({ userId: targetId, role: role ?? 'learner', displayName, assignedBy: userId })
+  }
+
+  // Update profile in lmsUserProfiles
+  const existingProfile = await db.select().from(lmsUserProfiles).where(eq(lmsUserProfiles.userId, targetId))
+  if (existingProfile.length) {
+    await db.update(lmsUserProfiles).set({ department, jobTitle, phone, notes, updatedAt: new Date() }).where(eq(lmsUserProfiles.userId, targetId))
+  } else {
+    await db.insert(lmsUserProfiles).values({ userId: targetId, department, jobTitle, phone, notes })
+  }
+
+  return NextResponse.json({ success: true })
+}
+
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { userId } = await auth()
+  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const [requester] = await db.select().from(lmsUserRoles).where(eq(lmsUserRoles.userId, userId))
+  if (!['owner', 'admin'].includes(requester?.role ?? '')) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
+  const { id: targetId } = await params
+  const [roleRow] = await db.select().from(lmsUserRoles).where(eq(lmsUserRoles.userId, targetId))
+  const [profile] = await db.select().from(lmsUserProfiles).where(eq(lmsUserProfiles.userId, targetId))
+
+  return NextResponse.json({ roleRow: roleRow ?? null, profile: profile ?? null })
+}
+
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { userId } = await auth()
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Users, Search, UserPlus, Mail, X, Loader2, ChevronDown, Eye, EyeOff, Check, BookOpen, Copy, KeyRound, Trash2, AlertTriangle, ListChecks } from 'lucide-react'
+import { Users, Search, UserPlus, Mail, X, Loader2, ChevronDown, Eye, EyeOff, Check, BookOpen, Copy, KeyRound, Trash2, AlertTriangle, ListChecks, Pencil } from 'lucide-react'
 import BulkAssignModal from './BulkAssignModal'
 
 type Role = 'owner' | 'admin' | 'manager' | 'learner'
@@ -49,6 +49,11 @@ export default function UserManagement({ initialUsers, currentRole }: { initialU
   const [deleteError, setDeleteError] = useState('')
   const [courses, setCourses] = useState<Course[]>([])
   const [showBulk, setShowBulk] = useState(false)
+  const [editUser, setEditUser] = useState<User | null>(null)
+  const [editForm, setEditForm] = useState({ displayName: '', role: 'learner' as Role, department: '', jobTitle: '', phone: '', notes: '' })
+  const [editLoading, setEditLoading] = useState(false)
+  const [editMsg, setEditMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
+  const [editFetching, setEditFetching] = useState(false)
   const router = useRouter()
 
   // Create user form state
@@ -175,6 +180,50 @@ export default function UserManagement({ initialUsers, currentRole }: { initialU
     setTimeout(() => setCopied(false), 2000)
   }
 
+  async function openEdit(user: User) {
+    setEditUser(user)
+    setEditMsg(null)
+    setEditForm({ displayName: user.name, role: user.role, department: '', jobTitle: '', phone: '', notes: '' })
+    setEditFetching(true)
+    try {
+      const res = await fetch(`/api/lms/users/${user.id}`)
+      const data = await res.json()
+      setEditForm(f => ({
+        ...f,
+        displayName: data.roleRow?.displayName ?? user.name,
+        role: data.roleRow?.role ?? user.role,
+        department: data.profile?.department ?? '',
+        jobTitle: data.profile?.jobTitle ?? '',
+        phone: data.profile?.phone ?? '',
+        notes: data.profile?.notes ?? '',
+      }))
+    } finally {
+      setEditFetching(false)
+    }
+  }
+
+  async function handleEditSave(e: React.FormEvent) {
+    e.preventDefault()
+    if (!editUser) return
+    setEditLoading(true)
+    setEditMsg(null)
+    const res = await fetch(`/api/lms/users/${editUser.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(editForm),
+    })
+    const data = await res.json()
+    setEditLoading(false)
+    if (data.error) {
+      setEditMsg({ type: 'err', text: data.error })
+    } else {
+      setUsers(prev => prev.map(u => u.id === editUser.id ? { ...u, name: editForm.displayName || u.name, role: editForm.role } : u))
+      setEditMsg({ type: 'ok', text: 'User updated successfully.' })
+      setTimeout(() => { setEditUser(null); setEditMsg(null) }, 1500)
+      router.refresh()
+    }
+  }
+
   function toggleCourse(courseId: string) {
     setForm(f => ({
       ...f,
@@ -285,7 +334,7 @@ export default function UserManagement({ initialUsers, currentRole }: { initialU
         <table className="w-full min-w-[700px]">
           <thead>
             <tr style={{ borderBottom: `1px solid ${ap.border}`, background: '#091525' }}>
-              {['User', 'Role', 'Enrolled', 'Certs', 'Joined', 'Temp Password', ...(currentRole === 'owner' ? [''] : [])].map((h, i) => (
+              {['User', 'Role', 'Enrolled', 'Certs', 'Joined', 'Temp Password', ''].map((h, i) => (
                 <th key={i} className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide" style={{ color: '#475569' }}>{h}</th>
               ))}
             </tr>
@@ -365,17 +414,26 @@ export default function UserManagement({ initialUsers, currentRole }: { initialU
                     </button>
                   )}
                 </td>
-                {currentRole === 'owner' && (
-                  <td className="px-4 py-3">
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-1">
                     <button
-                      onClick={() => { setDeleteConfirm(user); setDeleteError('') }}
-                      className="p-1.5 rounded-lg transition-colors hover:bg-red-900/30 group"
-                      title="Delete user"
+                      onClick={() => openEdit(user)}
+                      className="p-1.5 rounded-lg transition-colors hover:bg-blue-900/30 group"
+                      title="Edit user"
                     >
-                      <Trash2 className="w-4 h-4 text-gray-600 group-hover:text-red-400 transition-colors" />
+                      <Pencil className="w-4 h-4 text-gray-600 group-hover:text-blue-400 transition-colors" />
                     </button>
-                  </td>
-                )}
+                    {currentRole === 'owner' && (
+                      <button
+                        onClick={() => { setDeleteConfirm(user); setDeleteError('') }}
+                        className="p-1.5 rounded-lg transition-colors hover:bg-red-900/30 group"
+                        title="Delete user"
+                      >
+                        <Trash2 className="w-4 h-4 text-gray-600 group-hover:text-red-400 transition-colors" />
+                      </button>
+                    )}
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -681,6 +739,103 @@ export default function UserManagement({ initialUsers, currentRole }: { initialU
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit user modal */}
+      {editUser && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="rounded-2xl w-full max-w-lg mx-4 sm:mx-auto my-4 overflow-y-auto max-h-[90vh]" style={{ background: '#080f1e', border: `1px solid ${ap.border}` }}>
+            <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: ap.border }}>
+              <div>
+                <h2 className="text-white font-semibold text-lg">Edit User</h2>
+                <p className="text-xs mt-0.5" style={{ color: '#475569' }}>{editUser.email}</p>
+              </div>
+              <button onClick={() => { setEditUser(null); setEditMsg(null) }} className="text-gray-500 hover:text-white"><X className="w-5 h-5" /></button>
+            </div>
+
+            <form onSubmit={handleEditSave} className="p-6 space-y-4">
+              {editFetching ? (
+                <div className="flex items-center justify-center py-8"><Loader2 className="w-6 h-6 animate-spin" style={{ color: ap.cyan }} /></div>
+              ) : (
+                <>
+                  <div>
+                    <label className="text-xs uppercase tracking-wide block mb-1" style={{ color: '#64748b' }}>Display Name</label>
+                    <input
+                      value={editForm.displayName}
+                      onChange={e => setEditForm(f => ({ ...f, displayName: e.target.value }))}
+                      placeholder={editUser.email}
+                      className="w-full px-3 py-2 text-sm text-white rounded-lg focus:outline-none"
+                      style={{ background: '#091525', border: `1px solid ${ap.border}` }}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs uppercase tracking-wide block mb-1" style={{ color: '#64748b' }}>Role</label>
+                    <select
+                      value={editForm.role}
+                      onChange={e => setEditForm(f => ({ ...f, role: e.target.value as Role }))}
+                      className="w-full px-3 py-2 text-sm text-white rounded-lg focus:outline-none"
+                      style={{ background: '#091525', border: `1px solid ${ap.border}` }}
+                    >
+                      <option value="learner">Learner</option>
+                      <option value="manager">Manager</option>
+                      <option value="admin">Admin</option>
+                      <option value="owner">Owner</option>
+                    </select>
+                  </div>
+
+                  <div className="pt-2 border-t" style={{ borderColor: ap.border }}>
+                    <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: ap.cyan }}>Profile Info</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs uppercase tracking-wide block mb-1" style={{ color: '#64748b' }}>Department</label>
+                        <input value={editForm.department} onChange={e => setEditForm(f => ({ ...f, department: e.target.value }))}
+                          placeholder="Operations" className="w-full px-3 py-2 text-sm text-white rounded-lg focus:outline-none"
+                          style={{ background: '#091525', border: `1px solid ${ap.border}` }} />
+                      </div>
+                      <div>
+                        <label className="text-xs uppercase tracking-wide block mb-1" style={{ color: '#64748b' }}>Job Title</label>
+                        <input value={editForm.jobTitle} onChange={e => setEditForm(f => ({ ...f, jobTitle: e.target.value }))}
+                          placeholder="Ground Agent" className="w-full px-3 py-2 text-sm text-white rounded-lg focus:outline-none"
+                          style={{ background: '#091525', border: `1px solid ${ap.border}` }} />
+                      </div>
+                    </div>
+                    <div className="mt-3">
+                      <label className="text-xs uppercase tracking-wide block mb-1" style={{ color: '#64748b' }}>Phone</label>
+                      <input type="tel" value={editForm.phone} onChange={e => setEditForm(f => ({ ...f, phone: e.target.value }))}
+                        placeholder="+44 7700 900000" className="w-full px-3 py-2 text-sm text-white rounded-lg focus:outline-none"
+                        style={{ background: '#091525', border: `1px solid ${ap.border}` }} />
+                    </div>
+                    <div className="mt-3">
+                      <label className="text-xs uppercase tracking-wide block mb-1" style={{ color: '#64748b' }}>Notes</label>
+                      <textarea value={editForm.notes} onChange={e => setEditForm(f => ({ ...f, notes: e.target.value }))}
+                        rows={2} placeholder="Any notes..." className="w-full px-3 py-2 text-sm text-white rounded-lg focus:outline-none resize-none"
+                        style={{ background: '#091525', border: `1px solid ${ap.border}` }} />
+                    </div>
+                  </div>
+
+                  {editMsg && (
+                    <div className="rounded-xl p-3 text-sm"
+                      style={{ background: editMsg.type === 'ok' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', border: `1px solid ${editMsg.type === 'ok' ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'}`, color: editMsg.type === 'ok' ? '#86efac' : '#fca5a5' }}>
+                      {editMsg.text}
+                    </div>
+                  )}
+
+                  <div className="flex gap-3 pt-2">
+                    <button type="button" onClick={() => { setEditUser(null); setEditMsg(null) }}
+                      className="flex-1 py-2.5 rounded-xl text-sm text-gray-400 hover:text-white transition-colors"
+                      style={{ background: '#1e293b' }}>Cancel</button>
+                    <button type="submit" disabled={editLoading}
+                      className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white flex items-center justify-center gap-2 disabled:opacity-50"
+                      style={{ background: ap.blue }}>
+                      {editLoading ? <><Loader2 className="w-4 h-4 animate-spin" />Saving...</> : <><Check className="w-4 h-4" />Save Changes</>}
+                    </button>
+                  </div>
+                </>
+              )}
+            </form>
           </div>
         </div>
       )}

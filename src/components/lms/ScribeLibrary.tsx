@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { BookOpen, Check, X, Loader2, Eye, ChevronDown, Library, Search, Plus, Layers } from 'lucide-react'
+import { BookOpen, Check, X, Loader2, Eye, Library, Search, Plus, Layers } from 'lucide-react'
 
 interface ScribeItem {
   id: string
@@ -10,6 +10,7 @@ interface ScribeItem {
   slidesUrl: string
   movieUrl: string
   scrollUrl: string
+  courseGroup?: string | null
   orderIndex: number
 }
 
@@ -27,6 +28,7 @@ export default function ScribeLibrary({ initialItems, courses }: { initialItems:
   const [items, setItems] = useState(initialItems)
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [search, setSearch] = useState('')
+  const [groupFilter, setGroupFilter] = useState<string | null>(null)
   const [preview, setPreview] = useState<{ item: ScribeItem; mode: ViewMode } | null>(null)
   const [showAssign, setShowAssign] = useState(false)
   const [targetCourse, setTargetCourse] = useState('')
@@ -42,7 +44,13 @@ export default function ScribeLibrary({ initialItems, courses }: { initialItems:
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const filtered = items.filter(i => i.title.toLowerCase().includes(search.toLowerCase()))
+  const groups = Array.from(new Set(items.map(i => i.courseGroup).filter(Boolean) as string[])).sort()
+
+  const filtered = items.filter(i => {
+    const matchesSearch = i.title.toLowerCase().includes(search.toLowerCase())
+    const matchesGroup = !groupFilter || i.courseGroup === groupFilter
+    return matchesSearch && matchesGroup
+  })
 
   function toggle(id: string) {
     setSelected(prev => {
@@ -106,14 +114,32 @@ export default function ScribeLibrary({ initialItems, courses }: { initialItems:
             {items.length} guides · select one or many → assign to a course as lessons
           </p>
         </div>
-        {items.length === 0 && (
-          <button onClick={seed} disabled={seeding}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white disabled:opacity-50"
-            style={{ background: ap.blue }}>
-            {seeding ? <><Loader2 className="w-4 h-4 animate-spin" />Seeding...</> : <><Plus className="w-4 h-4" />Seed Lessons</>}
-          </button>
-        )}
+        <button onClick={seed} disabled={seeding}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white disabled:opacity-50"
+          style={{ background: ap.blue }}>
+          {seeding ? <><Loader2 className="w-4 h-4 animate-spin" />Syncing...</> : <><Plus className="w-4 h-4" />{items.length === 0 ? 'Seed Lessons' : 'Sync Library'}</>}
+        </button>
       </div>
+
+      {/* Course group filter pills */}
+      {groups.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-4">
+          <button
+            onClick={() => setGroupFilter(null)}
+            className="px-3 py-1 rounded-full text-xs font-medium transition-colors"
+            style={{ background: !groupFilter ? ap.blue : '#1e293b', color: '#fff', border: `1px solid ${!groupFilter ? ap.blue : ap.border}` }}>
+            All
+          </button>
+          {groups.map(g => (
+            <button key={g}
+              onClick={() => setGroupFilter(groupFilter === g ? null : g)}
+              className="px-3 py-1 rounded-full text-xs font-medium transition-colors"
+              style={{ background: groupFilter === g ? ap.blue : '#1e293b', color: groupFilter === g ? '#fff' : '#94a3b8', border: `1px solid ${groupFilter === g ? ap.blue : ap.border}` }}>
+              {g}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Search + select all */}
       <div className="flex items-center gap-3 mb-5">
@@ -138,11 +164,11 @@ export default function ScribeLibrary({ initialItems, courses }: { initialItems:
         <div className="text-center py-20 rounded-2xl" style={{ border: `1px dashed ${ap.border}` }}>
           <Library className="w-12 h-12 mx-auto mb-4" style={{ color: '#334155' }} />
           <p className="text-white font-semibold mb-2">No Scribe guides yet</p>
-          <p className="text-sm mb-6" style={{ color: '#475569' }}>Click "Seed Lessons" to load all 24 Airportr guides</p>
+          <p className="text-sm mb-6" style={{ color: '#475569' }}>Click "Seed Lessons" to load all Airportr guides</p>
           <button onClick={seed} disabled={seeding}
             className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white"
             style={{ background: ap.blue }}>
-            {seeding ? 'Seeding...' : 'Seed 24 Lessons'}
+            {seeding ? 'Seeding...' : 'Seed Lessons'}
           </button>
         </div>
       ) : (
@@ -166,10 +192,15 @@ export default function ScribeLibrary({ initialItems, courses }: { initialItems:
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-2 mb-1">
                       <span className="text-xs font-mono" style={{ color: '#334155' }}>#{idx + 1}</span>
-                      <span className="text-sm font-medium text-white leading-snug">{item.title}</span>
+                      {item.courseGroup && (
+                        <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: 'rgba(0,163,224,0.1)', color: ap.cyan, border: `1px solid rgba(0,163,224,0.2)` }}>
+                          {item.courseGroup}
+                        </span>
+                      )}
                     </div>
+                    <p className="text-sm font-medium text-white leading-snug mb-2">{item.title}</p>
 
                     {/* View buttons */}
                     <div className="flex gap-1.5" onClick={e => e.stopPropagation()}>
@@ -212,6 +243,11 @@ export default function ScribeLibrary({ initialItems, courses }: { initialItems:
             <div className="flex items-center justify-between px-5 py-4 border-b flex-shrink-0" style={{ borderColor: ap.border }}>
               <div>
                 <h2 className="text-white font-semibold">{preview.item.title}</h2>
+                {preview.item.courseGroup && (
+                  <span className="text-xs mt-1 inline-block px-1.5 py-0.5 rounded" style={{ background: 'rgba(0,163,224,0.1)', color: ap.cyan }}>
+                    {preview.item.courseGroup}
+                  </span>
+                )}
                 <div className="flex gap-2 mt-2">
                   {(['slides', 'movie', 'scroll'] as ViewMode[]).map(mode => (
                     <button key={mode}

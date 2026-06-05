@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, Fragment } from 'react'
 import Link from 'next/link'
 import { Search, ChevronDown, ChevronRight, Download, Bell, Loader2, Check } from 'lucide-react'
 
@@ -103,8 +103,8 @@ export default function TeamDashboard({ members, courses }: { members: TeamMembe
               {filtered.length === 0 ? (
                 <tr><td colSpan={7} className="text-center py-10 text-sm" style={{ color: '#334155' }}>No team members found</td></tr>
               ) : filtered.map(m => (
-                <>
-                  <tr key={m.userId} style={{ borderBottom: `1px solid rgba(30,58,110,0.4)`, background: ap.bg }}
+                <Fragment key={m.userId}>
+                  <tr style={{ borderBottom: `1px solid rgba(30,58,110,0.4)`, background: ap.bg }}
                     className="hover:bg-white/5 cursor-pointer transition-colors" onClick={() => setExpanded(expanded === m.userId ? null : m.userId)}>
                     <td className="px-4 py-3">
                       <p className="text-white text-sm font-medium">{m.name}</p>
@@ -118,7 +118,7 @@ export default function TeamDashboard({ members, courses }: { members: TeamMembe
                     <td className="px-4 py-3">{expanded === m.userId ? <ChevronDown className="w-4 h-4 text-gray-500" /> : <ChevronRight className="w-4 h-4 text-gray-500" />}</td>
                   </tr>
                   {expanded === m.userId && m.courses.length > 0 && (
-                    <tr key={`${m.userId}-expand`} style={{ background: '#080f1e', borderBottom: `1px solid ${ap.border}` }}>
+                    <tr style={{ background: '#080f1e', borderBottom: `1px solid ${ap.border}` }}>
                       <td colSpan={7} className="px-6 py-4">
                         <div className="flex items-center justify-between mb-3">
                           <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: '#475569' }}>Course Progress</p>
@@ -166,7 +166,7 @@ export default function TeamDashboard({ members, courses }: { members: TeamMembe
                       </td>
                     </tr>
                   )}
-                </>
+                </Fragment>
               ))}
             </tbody>
           </table>

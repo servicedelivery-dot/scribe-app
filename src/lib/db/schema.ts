@@ -220,6 +220,7 @@ export const lmsScribeLibrary = pgTable('lms_scribe_library', {
   slidesUrl: text('slides_url').notNull(),
   movieUrl: text('movie_url').notNull(),
   scrollUrl: text('scroll_url').notNull(),
+  courseGroup: text('course_group'),
   orderIndex: integer('order_index').default(0).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 })

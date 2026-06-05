@@ -1,57 +1,187 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* ── Design tokens ──────────────────────────────────────────────────────────── */
 :root {
-  --ap-blue: #003CA6;
-  --ap-blue-light: #0057D9;
-  --ap-cyan: #00A3E0;
-  --ap-dark: #001F5C;
-  --ap-navy: #0A0F1E;
+  /* Brand */
+  --blue:         #003CA6;
+  --blue-hover:   #0050d9;
+  --cyan:         #00A3E0;
+
+  /* Surfaces (darkest → lightest) */
+  --surface-0:    #030813;
+  --surface-1:    #070f1d;
+  --surface-2:    #0a1628;
+  --surface-3:    #0f1f38;
+  --surface-4:    #152035;
+  --surface-5:    #1a2d45;
+
+  /* Borders */
+  --border:       #152035;
+  --border-mid:   #1e3a6e;
+  --border-light: #283d5e;
+
+  /* Text */
+  --text-primary:   #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted:     #64748b;
+  --text-faint:     #334155;
+
+  /* Sidebar */
+  --sidebar-w:           240px;
+  --sidebar-collapsed-w: 64px;
+  --topbar-h:            56px;
+
+  /* Airportr brand (legacy – keep for existing inline styles) */
+  --ap-blue:      #003CA6;
+  --ap-blue-light:#0057D9;
+  --ap-cyan:      #00A3E0;
+  --ap-dark:      #001F5C;
+  --ap-navy:      #0A0F1E;
 }
 
+/* ── Base ────────────────────────────────────────────────────────────────────── */
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-body {
-  background: #0A0F1E;
-  color: #ffffff;
-  font-family: 'DM Sans', system-ui, sans-serif;
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
   -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  background: var(--surface-0);
+  color: var(--text-primary);
+  font-family: 'DM Sans', system-ui, sans-serif;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Mobile touch targets — ONLY on touch devices, ONLY on primary action buttons */
-@media (hover: none) and (pointer: coarse) {
-  .btn-touch {
-    min-height: 44px;
-    min-width: 44px;
-  }
+/* ── Scrollbars ──────────────────────────────────────────────────────────────── */
+@media (hover: hover) {
+  ::-webkit-scrollbar       { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--surface-5); border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border-mid); }
 }
 
-/* Safe area — iOS notch + home bar */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ── Touch & mobile ─────────────────────────────────────────────────────────── */
+.scroll-touch  { -webkit-overflow-scrolling: touch; }
+.overflow-x-auto, .overflow-y-auto { -webkit-overflow-scrolling: touch; }
+
 .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
 .pt-safe { padding-top:    env(safe-area-inset-top,    0px); }
 .pl-safe { padding-left:   env(safe-area-inset-left,   0px); }
 .pr-safe { padding-right:  env(safe-area-inset-right,  0px); }
 
-/* iOS smooth momentum scroll */
-.scroll-touch { -webkit-overflow-scrolling: touch; }
-
-/* Custom scrollbar — desktop only (hidden on mobile) */
-@media (hover: hover) {
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: #0f172a; }
-  ::-webkit-scrollbar-thumb { background: #1e3a6e; border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: #2d5299; }
+@media (hover: none) and (pointer: coarse) {
+  .btn-touch { min-height: 44px; min-width: 44px; }
 }
 
-/* Horizontal scroll containers */
-.overflow-x-auto { -webkit-overflow-scrolling: touch; }
-.overflow-y-auto { -webkit-overflow-scrolling: touch; }
+/* ── Focus ───────────────────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
 
-/* Hide scrollbar on mobile nav elements */
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+/* ── Selection ───────────────────────────────────────────────────────────────── */
+::selection {
+  background: rgba(0, 163, 224, 0.25);
+  color: #fff;
+}
+
+/* ── Utility helpers ─────────────────────────────────────────────────────────── */
+
+/* Card */
+.card {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+
+/* Muted badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--surface-3);
+  color: var(--text-muted);
+}
+
+/* Section heading */
+.section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+/* Divider */
+.divider {
+  height: 1px;
+  background: var(--border);
+}
+
+/* Hover bg utilities */
+.hover\:bg-surface-3:hover { background: var(--surface-3); }
+.hover\:bg-surface-4:hover { background: var(--surface-4); }
+
+/* Transition default */
+.transition-default {
+  transition: color 0.15s, background 0.15s, border-color 0.15s, opacity 0.15s;
+}
+
+/* Button primary */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--blue);
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.btn-primary:hover { opacity: 0.9; }
+.btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* Button ghost */
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+.btn-ghost:hover { background: var(--surface-3); color: var(--text-primary); }
