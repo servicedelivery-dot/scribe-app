@@ -4,7 +4,10 @@ import { db } from '@/lib/db'
 import { lmsSignoffs, lmsUserRoles } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   const { userId } = await auth()
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -14,6 +17,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
+  const { id } = await params
   const { status, notes } = await req.json()
   if (status !== 'approved' && status !== 'rejected') {
     return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
@@ -26,7 +30,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
       reviewedAt: new Date(),
       ...(notes !== undefined ? { notes } : {}),
     })
-    .where(eq(lmsSignoffs.id, params.id))
+    .where(eq(lmsSignoffs.id, id))
     .returning()
 
   if (!updated) return NextResponse.json({ error: 'Not found' }, { status: 404 })
