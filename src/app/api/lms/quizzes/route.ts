@@ -2,7 +2,7 @@ import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { lmsQuizQuestions, lmsQuizAttempts, lmsCertificates, lmsProgress, lmsLessons } from '@/lib/db/schema'
-import { eq, and, asc } from 'drizzle-orm'
+import { eq, and, asc, isNull } from 'drizzle-orm'
 
 // Get questions for a course/lesson
 export async function GET(req: Request) {
@@ -17,10 +17,9 @@ export async function GET(req: Request) {
   let questions
   if (endOfCourse || (!lessonId && !endOfCourse)) {
     // End-of-course quiz: lessonId IS NULL
-    const all = await db.select().from(lmsQuizQuestions)
-      .where(eq(lmsQuizQuestions.courseId, courseId))
+    questions = await db.select().from(lmsQuizQuestions)
+      .where(and(eq(lmsQuizQuestions.courseId, courseId), isNull(lmsQuizQuestions.lessonId)))
       .orderBy(asc(lmsQuizQuestions.orderIndex))
-    questions = all.filter(q => q.lessonId === null)
   } else {
     questions = await db.select().from(lmsQuizQuestions)
       .where(and(eq(lmsQuizQuestions.courseId, courseId), eq(lmsQuizQuestions.lessonId, lessonId!)))

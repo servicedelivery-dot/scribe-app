@@ -2,7 +2,7 @@ import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { lmsQuizQuestions, lmsQuizAttempts, lmsCertificates, lmsProgress, lmsLessons, lmsCourses, lmsUserRoles } from '@/lib/db/schema'
-import { eq, and } from 'drizzle-orm'
+import { eq, and, isNull } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 
 const PASS_THRESHOLD = 70 // 70% to pass
@@ -15,7 +15,7 @@ export async function POST(req: Request) {
 
   const questions = lessonId
     ? await db.select().from(lmsQuizQuestions).where(and(eq(lmsQuizQuestions.courseId, courseId), eq(lmsQuizQuestions.lessonId, lessonId)))
-    : await db.select().from(lmsQuizQuestions).where(and(eq(lmsQuizQuestions.courseId, courseId), eq(lmsQuizQuestions.lessonId, lmsQuizQuestions.lessonId)))
+    : await db.select().from(lmsQuizQuestions).where(and(eq(lmsQuizQuestions.courseId, courseId), isNull(lmsQuizQuestions.lessonId)))
 
   const correct = questions.filter((q, i) => answers[i] === q.correctIndex).length
   const score = questions.length > 0 ? Math.round((correct / questions.length) * 100) : 0
