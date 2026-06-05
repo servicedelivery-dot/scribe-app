@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from '@clerk/nextjs'
+import Script from 'next/script'
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -24,10 +25,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <ClerkProvider>
       <html lang="en" className="h-full">
-        <head>
-          {/* Google Translate — free, auto-detects user language */}
-          <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async />
-          <script dangerouslySetInnerHTML={{ __html: `
+        <head />
+        <body className="h-full antialiased" style={{ background: '#0A0F1E', color: '#fff' }}>
+          {/* Hidden translate anchor */}
+          <div id="google_translate_element" style={{ position: 'absolute', top: 0, right: 0, zIndex: 9999, opacity: 0, pointerEvents: 'none', height: 0, overflow: 'hidden' }} />
+          {children}
+          {/* Google Translate */}
+          <Script id="google-translate-init" strategy="beforeInteractive">{`
             function googleTranslateElementInit() {
               new google.translate.TranslateElement({
                 pageLanguage: 'en',
@@ -36,12 +40,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 multilanguagePage: true
               }, 'google_translate_element');
             }
-          `}} />
-        </head>
-        <body className="h-full antialiased" style={{ background: '#0A0F1E', color: '#fff' }}>
-          {/* Hidden translate anchor — Google auto-shows the bar when language differs from browser */}
-          <div id="google_translate_element" style={{ position: 'absolute', top: 0, right: 0, zIndex: 9999, opacity: 0, pointerEvents: 'none', height: 0, overflow: 'hidden' }} />
-          {children}
+          `}</Script>
+          <Script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" strategy="afterInteractive" />
         </body>
       </html>
     </ClerkProvider>

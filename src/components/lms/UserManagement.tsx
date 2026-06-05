@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Users, Search, UserPlus, Mail, X, Loader2, ChevronDown, Eye, EyeOff, Check, BookOpen, Copy, KeyRound, Trash2, AlertTriangle } from 'lucide-react'
+import { Users, Search, UserPlus, Mail, X, Loader2, ChevronDown, Eye, EyeOff, Check, BookOpen, Copy, KeyRound, Trash2, AlertTriangle, ListChecks } from 'lucide-react'
+import BulkAssignModal from './BulkAssignModal'
 
 type Role = 'owner' | 'admin' | 'manager' | 'learner'
 
@@ -47,6 +48,7 @@ export default function UserManagement({ initialUsers, currentRole }: { initialU
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState('')
   const [courses, setCourses] = useState<Course[]>([])
+  const [showBulk, setShowBulk] = useState(false)
   const router = useRouter()
 
   // Create user form state
@@ -223,6 +225,13 @@ export default function UserManagement({ initialUsers, currentRole }: { initialU
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2">
+          <button
+            onClick={() => setShowBulk(true)}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-colors"
+            style={{ background: '#1e293b', color: '#94a3b8', border: `1px solid ${ap.border}` }}
+          >
+            <ListChecks className="w-4 h-4" /> Bulk Assign
+          </button>
           <button
             onClick={() => { setShowInvite(true); setInviteMsg(null) }}
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-colors"
@@ -674,6 +683,16 @@ export default function UserManagement({ initialUsers, currentRole }: { initialU
             </div>
           </div>
         </div>
+      )}
+
+      {/* Bulk assign modal */}
+      {showBulk && (
+        <BulkAssignModal
+          users={users}
+          courses={courses}
+          onClose={() => setShowBulk(false)}
+          onSuccess={() => { setShowBulk(false); router.refresh() }}
+        />
       )}
     </div>
   )

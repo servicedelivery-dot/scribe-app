@@ -1,10 +1,11 @@
 import { auth } from '@clerk/nextjs/server'
 import { notFound } from 'next/navigation'
 import { db } from '@/lib/db'
-import { lmsCourses, lmsModules, lmsLessons, lmsEnrollments, lmsProgress, lmsCertificates, lmsQuizQuestions } from '@/lib/db/schema'
+import { lmsCourses, lmsModules, lmsLessons, lmsEnrollments, lmsProgress, lmsCertificates, lmsQuizQuestions, lmsCourseFeedback } from '@/lib/db/schema'
 import { eq, and, asc, count, isNull } from 'drizzle-orm'
 import Link from 'next/link'
 import CourseEnrollButton from '@/components/lms/CourseEnrollButton'
+import CourseFeedbackWidget from '@/components/lms/CourseFeedbackWidget'
 import { BookOpen, CheckCircle, Award, Users, Lock } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
@@ -39,6 +40,11 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
   // Certificate
   const existingCert = userId
     ? await db.select().from(lmsCertificates).where(and(eq(lmsCertificates.userId, userId), eq(lmsCertificates.courseId, id)))
+    : []
+
+  // Existing feedback from this user
+  const existingFeedback = userId && existingCert.length > 0
+    ? await db.select().from(lmsCourseFeedback).where(and(eq(lmsCourseFeedback.userId, userId), eq(lmsCourseFeedback.courseId, id)))
     : []
 
   const firstLesson = lessons[0]
@@ -193,6 +199,15 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
           </div>
         )}
       </div>
+
+      {/* Feedback widget — only for certified learners */}
+      {existingCert.length > 0 && (
+        <CourseFeedbackWidget
+          courseId={id}
+          existingRating={existingFeedback[0]?.rating ?? null}
+          existingComment={existingFeedback[0]?.comment ?? null}
+        />
+      )}
     </div>
   )
 }

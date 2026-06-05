@@ -224,6 +224,28 @@ export const lmsScribeLibrary = pgTable('lms_scribe_library', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 })
 
+// ── Notifications ────────────────────────────────────────────────────────────
+export const lmsNotifications = pgTable('lms_notifications', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: text('user_id').notNull(),
+  type: text('type').notNull(), // 'assignment'|'quiz_passed'|'certificate'|'announcement'|'overdue'
+  title: text('title').notNull(),
+  body: text('body'),
+  link: text('link'),
+  read: boolean('read').default(false).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+})
+
+// ── Course Feedback ───────────────────────────────────────────────────────────
+export const lmsCourseFeedback = pgTable('lms_course_feedback', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  courseId: uuid('course_id').notNull().references(() => lmsCourses.id, { onDelete: 'cascade' }),
+  userId: text('user_id').notNull(),
+  rating: integer('rating').notNull(), // 1-5
+  comment: text('comment'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+})
+
 // ── Announcements ─────────────────────────────────────────────────────────────
 export const lmsAnnouncements = pgTable('lms_announcements', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -232,4 +254,34 @@ export const lmsAnnouncements = pgTable('lms_announcements', {
   body: text('body').notNull(),
   pinned: boolean('pinned').default(false).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
+})
+
+// ── Org Settings (single row) ─────────────────────────────────────────────────
+export const lmsOrgSettings = pgTable('lms_org_settings', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgName: text('org_name').default('Academy').notNull(),
+  logoUrl: text('logo_url'),
+  primaryColor: text('primary_color').default('#003CA6').notNull(),
+  allowSelfRegister: boolean('allow_self_register').default(false).notNull(),
+  defaultRole: text('default_role').default('learner').notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+})
+
+// ── Learning Paths ────────────────────────────────────────────────────────────
+export const lmsLearningPaths = pgTable('lms_learning_paths', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  title: text('title').notNull(),
+  description: text('description'),
+  emoji: text('emoji').default('🛤️').notNull(),
+  createdBy: text('created_by').notNull(),
+  published: boolean('published').default(false).notNull(),
+  orderIndex: integer('order_index').default(0).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+})
+
+export const lmsLearningPathCourses = pgTable('lms_learning_path_courses', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  pathId: uuid('path_id').notNull().references(() => lmsLearningPaths.id, { onDelete: 'cascade' }),
+  courseId: uuid('course_id').notNull().references(() => lmsCourses.id, { onDelete: 'cascade' }),
+  orderIndex: integer('order_index').default(0).notNull(),
 })

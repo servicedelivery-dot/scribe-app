@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
 import LmsSidebar from './LmsSidebar'
 import GlobalSearch from './GlobalSearch'
+import NotificationBell from './NotificationBell'
 
 type Role = 'owner' | 'admin' | 'manager' | 'learner'
 
@@ -22,7 +23,7 @@ export default function LmsShell({ role, children }: { role: Role; children: Rea
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  const showSearch = role !== 'learner'
+  const showSearch = true
   // Show topbar if: mobile always (for hamburger) or desktop with search
   // On desktop with no search (learner), the topbar is hidden entirely
   const showTopbar = true // hamburger always needed on mobile
@@ -80,6 +81,9 @@ export default function LmsShell({ role, children }: { role: Role; children: Rea
               <GlobalSearch />
             </div>
           )}
+
+          {/* Notification bell */}
+          <NotificationBell />
         </div>
 
         {/* Page content */}

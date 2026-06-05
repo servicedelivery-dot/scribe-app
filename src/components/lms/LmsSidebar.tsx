@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, BookOpen, BarChart2, Users, Award, Megaphone, TrendingUp, GraduationCap, UserCircle, Library, Layers, Calendar, AlertTriangle, ClipboardCheck, Activity, Search, Upload } from 'lucide-react'
+import { LayoutDashboard, BookOpen, BarChart2, Users, Award, Megaphone, TrendingUp, GraduationCap, UserCircle, Library, Layers, Calendar, AlertTriangle, ClipboardCheck, Activity, Search, Upload, BarChart, Star, Bell, Route, Settings } from 'lucide-react'
 import { UserButton } from '@clerk/nextjs'
 import Image from 'next/image'
 
@@ -29,8 +29,11 @@ const sections: NavSection[] = [
   { label: 'My Learning', links: [
     { href: '/lms/profile', icon: <UserCircle className="w-4 h-4" />, label: 'My Courses', roles: ['learner'] },
     { href: '/lms/certificates', icon: <Award className="w-4 h-4" />, label: 'Certificates', roles: ['owner', 'admin', 'manager', 'learner'] },
+    { href: '/lms/notifications', icon: <Bell className="w-4 h-4" />, label: 'Notifications', roles: ['owner', 'admin', 'manager', 'learner'] },
   ]},
   { label: 'Manage', links: [
+    { href: '/lms/platform', icon: <BarChart className="w-4 h-4" />, label: 'Platform Overview', roles: ['owner', 'admin'] },
+    { href: '/lms/team', icon: <Users className="w-4 h-4" />, label: 'Team Progress', roles: ['owner', 'admin', 'manager'] },
     { href: '/lms/manage', icon: <BookOpen className="w-4 h-4" />, label: 'Courses', roles: ['owner', 'admin', 'manager'] },
     { href: '/lms/groups', icon: <Layers className="w-4 h-4" />, label: 'Groups', roles: ['owner', 'admin', 'manager'] },
     { href: '/lms/scribe-library', icon: <Library className="w-4 h-4" />, label: 'Scribe Library', roles: ['owner', 'admin', 'manager'] },
@@ -42,12 +45,17 @@ const sections: NavSection[] = [
     { href: '/lms/calendar', icon: <Calendar className="w-4 h-4" />, label: 'Calendar', roles: ['owner', 'admin', 'manager'] },
     { href: '/lms/overdue', icon: <AlertTriangle className="w-4 h-4" />, label: 'Overdue', roles: ['owner', 'admin', 'manager'] },
     { href: '/lms/activity', icon: <Activity className="w-4 h-4" />, label: 'Activity Log', roles: ['owner', 'admin', 'manager'] },
+    { href: '/lms/feedback', icon: <Star className="w-4 h-4" />, label: 'Course Feedback', roles: ['owner', 'admin', 'manager'] },
   ]},
   { label: 'Tools', links: [
     { href: '/dashboard', icon: <LayoutDashboard className="w-4 h-4" />, label: 'Content Creator', roles: ['owner', 'admin', 'manager'] },
     { href: '/dashboard/usage', icon: <BarChart2 className="w-4 h-4" />, label: 'Usage', roles: ['owner', 'admin'] },
+    { href: '/lms/paths', icon: <Route className="w-4 h-4" />, label: 'Learning Paths', roles: ['owner', 'admin', 'manager', 'learner'] },
+    { href: '/lms/settings', icon: <Settings className="w-4 h-4" />, label: 'Settings', roles: ['owner', 'admin'] },
   ]},
 ]
+
+const STANDALONE_LMS_URL = process.env.NEXT_PUBLIC_STANDALONE_LMS_URL || ''
 
 export default function LmsSidebar({ role, onNavigate }: { role: Role; onNavigate?: () => void }) {
   const pathname = usePathname()
@@ -84,6 +92,23 @@ export default function LmsSidebar({ role, onNavigate }: { role: Role; onNavigat
           </div>
         ))}
       </nav>
+
+      {/* Standalone LMS cross-link — visible when env var is set */}
+      {STANDALONE_LMS_URL && (
+        <div className="px-3 pb-2">
+          <a
+            href={STANDALONE_LMS_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs w-full transition-colors hover:bg-white/5"
+            style={{ color: '#475569', border: '1px dashed #1e3a6e' }}
+          >
+            <span>📄</span>
+            <span className="flex-1">Standalone LMS</span>
+            <span style={{ fontSize: 10 }}>↗</span>
+          </a>
+        </div>
+      )}
 
       <div className="p-4 border-t flex items-center gap-3" style={{ borderColor: '#0d2545' }}>
         <UserButton appearance={{ elements: { userButtonAvatarBox: 'w-8 h-8' } }} />
