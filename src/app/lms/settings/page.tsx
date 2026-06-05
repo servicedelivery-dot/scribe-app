@@ -32,7 +32,7 @@ export default async function SettingsPage() {
 
   return (
     <SettingsPanel
-      settings={settings}
+      settings={{ ...settings, updatedAt: settings.updatedAt.toISOString() }}
       stats={{
         users: userCount[0].count,
         courses: courseCount[0].count,

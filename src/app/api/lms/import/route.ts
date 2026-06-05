@@ -46,7 +46,7 @@ export async function POST(req: Request) {
           const fileRes = await fetch(fileUrl)
           const arrayBuffer = await fileRes.arrayBuffer()
           const buffer = Buffer.from(arrayBuffer)
-          const result = await mammoth.convertToMarkdown({ buffer })
+          const result = await mammoth.convertToHtml({ buffer })
           extracted = result.value
         } catch (e) {
           console.error('DOCX extraction failed:', e)

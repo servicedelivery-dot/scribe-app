@@ -21,7 +21,7 @@ export default async function GroupsPage() {
       .select({ count: count() })
       .from(lmsCourseGroups)
       .where(eq(lmsCourseGroups.groupId, g.id))
-    return { ...g, courseCount: Number(courseCount.count) }
+    return { ...g, createdAt: g.createdAt.toISOString(), courseCount: Number(courseCount.count) }
   }))
 
   return <GroupsManager initialGroups={enriched} />

@@ -39,7 +39,7 @@ export default async function CalendarPage() {
     courseId: a.courseId,
     courseTitle: a.courseTitle,
     courseEmoji: a.courseEmoji,
-    dueDate: a.dueDate ? new Date(a.dueDate).toISOString() : null,
+    dueDate: a.dueDate ? new Date(a.dueDate).toISOString() : new Date().toISOString(),
     assignedAt: new Date(a.assignedAt).toISOString(),
   }))
 

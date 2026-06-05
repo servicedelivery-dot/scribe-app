@@ -219,7 +219,7 @@ export default function CalendarView({ assignments }: Props) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {selectedAssignments.map((a) => {
                 const due = new Date(a.dueDate)
-                const pastDue = due < today
+                const pastDue = due < (todayDate ?? new Date())
                 return (
                   <div
                     key={a.id}

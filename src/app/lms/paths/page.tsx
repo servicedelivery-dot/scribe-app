@@ -34,6 +34,7 @@ export default async function PathsPage() {
 
     return {
       ...p,
+      createdAt: p.createdAt.toISOString(),
       courses: pcRows.map(r => courses.find(c => c.id === r.courseId) ?? null).filter(Boolean) as typeof courses,
     }
   }))
