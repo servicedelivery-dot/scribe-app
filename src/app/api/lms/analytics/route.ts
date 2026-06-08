@@ -26,12 +26,12 @@ export async function GET() {
 
     // Enrollments per day last 30 days
     db.select({
-      day: sql<string>`DATE(${lmsEnrollments.enrolledAt})`,
+      day: sql<string>`${lmsEnrollments.enrolledAt}::date`,
       count: count(),
     }).from(lmsEnrollments)
       .where(gte(lmsEnrollments.enrolledAt, thirtyDaysAgo))
-      .groupBy(sql`DATE(${lmsEnrollments.enrolledAt})`)
-      .orderBy(sql`DATE(${lmsEnrollments.enrolledAt})`),
+      .groupBy(sql`${lmsEnrollments.enrolledAt}::date`)
+      .orderBy(sql`${lmsEnrollments.enrolledAt}::date`),
 
     // Top courses by enrollment
     db.select({

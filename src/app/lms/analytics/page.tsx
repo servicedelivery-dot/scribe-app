@@ -14,12 +14,6 @@ export default async function AnalyticsPage() {
   const [requester] = await dbCheck.select().from(roles).where(eqCheck(roles.userId, userId))
   if (!['owner', 'admin', 'manager'].includes(requester?.role ?? '')) redirect('/lms')
 
-  const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'}/api/lms/analytics`, {
-    headers: { Cookie: '' },
-    cache: 'no-store',
-  })
-
-  // Fetch server-side via DB directly
   const { db } = await import('@/lib/db')
   const { lmsCourses, lmsEnrollments, lmsProgress, lmsLessons, lmsCertificates, lmsQuizAttempts } = await import('@/lib/db/schema')
   const { count, desc, gte, sql, eq } = await import('drizzle-orm')
@@ -31,9 +25,9 @@ export default async function AnalyticsPage() {
     db.select({ count: count() }).from(lmsEnrollments),
     db.select({ count: count() }).from(lmsCertificates),
     db.select({ count: count() }).from(lmsCertificates),
-    db.select({ day: sql<string>`DATE(${lmsEnrollments.enrolledAt})`, cnt: count() })
+    db.select({ day: sql<string>`${lmsEnrollments.enrolledAt}::date`, cnt: count() })
       .from(lmsEnrollments).where(gte(lmsEnrollments.enrolledAt, thirtyDaysAgo))
-      .groupBy(sql`DATE(${lmsEnrollments.enrolledAt})`).orderBy(sql`DATE(${lmsEnrollments.enrolledAt})`),
+      .groupBy(sql`${lmsEnrollments.enrolledAt}::date`).orderBy(sql`${lmsEnrollments.enrolledAt}::date`),
     db.select({ courseId: lmsEnrollments.courseId, enrollCount: count() })
       .from(lmsEnrollments).groupBy(lmsEnrollments.courseId).orderBy(desc(count())).limit(5),
   ])
