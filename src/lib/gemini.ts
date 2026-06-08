@@ -5,9 +5,9 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
 // Fallback chain — tries each model in order until one works
 const MODEL_CHAIN = [
   'gemini-2.5-flash',
+  'gemini-flash-latest',
   'gemini-2.0-flash',
   'gemini-2.0-flash-lite',
-  'gemini-flash-latest',
 ]
 
 function isRetryable(message: string) {
