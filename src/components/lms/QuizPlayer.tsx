@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -65,7 +65,7 @@ export default function QuizPlayer({ questions, courseId, lessonId, onComplete }
             {showBreakdown ? 'Hide' : 'View'} breakdown
           </button>
           {!result.passed && (
-            <button onClick={retry} className="flex-1 flex items-center justify-center gap-2 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-lg text-sm transition-colors">
+            <button onClick={retry} className="flex-1 flex items-center justify-center gap-2 py-2 bg-[#003CA6] hover:bg-[#0048CC] text-white rounded-lg text-sm transition-colors">
               <RotateCcw className="w-4 h-4" /> Try again
             </button>
           )}
@@ -104,7 +104,7 @@ export default function QuizPlayer({ questions, courseId, lessonId, onComplete }
             <div className="space-y-2">
               {q.options.map((opt, oi) => (
                 <button key={oi} onClick={() => setAnswers(prev => prev.map((a, i) => i === qi ? oi : a))}
-                  className={`w-full text-left px-4 py-2.5 min-h-[44px] rounded-xl text-sm transition-colors border ${answers[qi] === oi ? 'border-violet-500 bg-violet-600/20 text-violet-200' : 'border-gray-700 text-gray-400 hover:border-gray-600 hover:text-white'}`}>
+                  className={`w-full text-left px-4 py-2.5 min-h-[44px] rounded-xl text-sm transition-colors border ${answers[qi] === oi ? 'border-[#0048CC] bg-[#003CA6]/20 text-[#60c8f0]' : 'border-gray-700 text-gray-400 hover:border-gray-600 hover:text-white'}`}>
                   <span className="inline-flex w-5 h-5 rounded-full border border-current items-center justify-center text-xs mr-2 flex-shrink-0">
                     {String.fromCharCode(65 + oi)}
                   </span>
@@ -115,7 +115,7 @@ export default function QuizPlayer({ questions, courseId, lessonId, onComplete }
           </div>
         ))}
         <button onClick={submit} disabled={submitting || answers.some(a => a === null)}
-          className="w-full py-2.5 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white rounded-xl font-medium transition-colors flex items-center justify-center gap-2">
+          className="w-full py-2.5 bg-[#003CA6] hover:bg-[#0048CC] disabled:opacity-50 text-white rounded-xl font-medium transition-colors flex items-center justify-center gap-2">
           {submitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Submitting...</> : 'Submit Quiz'}
         </button>
       </div>

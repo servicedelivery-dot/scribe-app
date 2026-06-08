@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -115,7 +115,7 @@ export default function NewCourseButton() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-lg text-sm font-medium transition-colors"
+        className="flex items-center gap-2 px-4 py-2 bg-[#003CA6] hover:bg-[#0048CC] text-white rounded-lg text-sm font-medium transition-colors"
       >
         <Plus className="w-4 h-4" /> New Course
       </button>
@@ -146,7 +146,7 @@ export default function NewCourseButton() {
                     <div className="flex gap-2 flex-wrap">
                       {EMOJIS.map(e => (
                         <button key={e} type="button" onClick={() => setEmoji(e)}
-                          className={`text-2xl p-1.5 rounded-lg transition-colors ${emoji === e ? 'bg-violet-600' : 'hover:bg-gray-800'}`}>
+                          className={`text-2xl p-1.5 rounded-lg transition-colors ${emoji === e ? 'bg-[#003CA6]' : 'hover:bg-gray-800'}`}>
                           {e}
                         </button>
                       ))}
@@ -159,14 +159,14 @@ export default function NewCourseButton() {
                     onChange={e => setTitle(e.target.value)}
                     required
                     autoFocus
-                    className="w-full px-3 py-2 bg-gray-800 text-white rounded-lg border border-gray-700 focus:outline-none focus:border-violet-500 placeholder-gray-500"
+                    className="w-full px-3 py-2 bg-gray-800 text-white rounded-lg border border-gray-700 focus:outline-none focus:border-[#0048CC] placeholder-gray-500"
                   />
                   <textarea
                     placeholder="Description (optional)"
                     value={description}
                     onChange={e => setDescription(e.target.value)}
                     rows={2}
-                    className="w-full px-3 py-2 bg-gray-800 text-white rounded-lg border border-gray-700 focus:outline-none focus:border-violet-500 placeholder-gray-500 resize-none"
+                    className="w-full px-3 py-2 bg-gray-800 text-white rounded-lg border border-gray-700 focus:outline-none focus:border-[#0048CC] placeholder-gray-500 resize-none"
                   />
                   <div className="flex gap-3 pt-1">
                     <button type="button" onClick={reset}
@@ -176,7 +176,7 @@ export default function NewCourseButton() {
                     <button
                       type="submit"
                       disabled={loading || !title.trim()}
-                      className="flex-1 py-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white rounded-lg text-sm font-medium transition-colors"
+                      className="flex-1 py-2 bg-[#003CA6] hover:bg-[#0048CC] disabled:opacity-50 text-white rounded-lg text-sm font-medium transition-colors"
                     >
                       {loading ? 'Creating...' : 'Create →'}
                     </button>
@@ -198,11 +198,11 @@ export default function NewCourseButton() {
                       value={dueDate}
                       onChange={e => setDueDate(e.target.value)}
                       min={new Date().toISOString().split('T')[0]}
-                      className="w-full px-3 py-2 bg-gray-800 text-white rounded-lg border border-gray-700 focus:outline-none focus:border-violet-500 text-sm"
+                      className="w-full px-3 py-2 bg-gray-800 text-white rounded-lg border border-gray-700 focus:outline-none focus:border-[#0048CC] text-sm"
                       style={{ colorScheme: 'dark' }}
                     />
                     {dueDate && (
-                      <p className="text-xs text-violet-400 mt-1">
+                      <p className="text-xs text-[#00A3E0] mt-1">
                         Due: {new Date(dueDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
                       </p>
                     )}
@@ -214,7 +214,7 @@ export default function NewCourseButton() {
                       <label className="text-xs text-gray-400 uppercase tracking-wide flex items-center gap-1.5">
                         <Users className="w-3.5 h-3.5" /> Users
                         {selectedUserIds.length > 0 && (
-                          <span className="text-violet-400 normal-case font-normal ml-1">
+                          <span className="text-[#00A3E0] normal-case font-normal ml-1">
                             {selectedUserIds.length} selected
                           </span>
                         )}
@@ -235,7 +235,7 @@ export default function NewCourseButton() {
                         value={userSearch}
                         onChange={e => setUserSearch(e.target.value)}
                         placeholder="Search users..."
-                        className="w-full pl-8 pr-3 py-2 bg-gray-800 text-white rounded-lg border border-gray-700 focus:outline-none focus:border-violet-500 placeholder-gray-500 text-sm"
+                        className="w-full pl-8 pr-3 py-2 bg-gray-800 text-white rounded-lg border border-gray-700 focus:outline-none focus:border-[#0048CC] placeholder-gray-500 text-sm"
                       />
                     </div>
                     {loadingUsers ? (
@@ -290,7 +290,7 @@ export default function NewCourseButton() {
                       type="button"
                       onClick={handleAssign}
                       disabled={assigning}
-                      className="flex-1 py-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                      className="flex-1 py-2 bg-[#003CA6] hover:bg-[#0048CC] disabled:opacity-50 text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
                     >
                       {assigning
                         ? <><Loader2 className="w-4 h-4 animate-spin" /> Assigning...</>

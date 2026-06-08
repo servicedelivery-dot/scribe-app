@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -32,6 +32,8 @@ export default function CourseEditor({ course, initialModules }: Props) {
   const [saving, setSaving] = useState(false)
   const [autoGenerating, setAutoGenerating] = useState(false)
   const [autoGenMsg, setAutoGenMsg] = useState('')
+  const [generatingOverview, setGeneratingOverview] = useState(false)
+  const [overviewMsg, setOverviewMsg] = useState('')
   const router = useRouter()
 
   async function saveSettings() {
@@ -143,7 +145,7 @@ export default function CourseEditor({ course, initialModules }: Props) {
                   {mod.lessons.map(lesson => (
                     <div key={lesson.id} className="flex items-center gap-1 group/lesson">
                       <button onClick={() => openLesson(lesson)}
-                        className={`flex-1 text-left px-2 py-1.5 text-xs rounded-lg transition-colors truncate ${activeLesson?.id === lesson.id ? 'bg-violet-600/20 text-violet-300' : 'text-gray-500 hover:text-white hover:bg-gray-800'}`}>
+                        className={`flex-1 text-left px-2 py-1.5 text-xs rounded-lg transition-colors truncate ${activeLesson?.id === lesson.id ? 'bg-[#003CA6]/20 text-[#00A3E0]' : 'text-gray-500 hover:text-white hover:bg-gray-800'}`}>
                         {lesson.title}
                       </button>
                       <button onClick={() => deleteLesson(lesson.id, mod.id)} className="opacity-0 group-hover/lesson:opacity-100 p-1 text-red-500 hover:bg-red-900/30 rounded transition-all">
@@ -169,7 +171,7 @@ export default function CourseEditor({ course, initialModules }: Props) {
           {/* Course Assessment shortcut */}
           <button
             onClick={() => { setActiveLesson(null); setActiveView('course-quiz') }}
-            className={`w-full flex items-center justify-center gap-2 py-2 rounded-lg text-sm transition-colors border ${activeView === 'course-quiz' ? 'bg-violet-600/30 text-violet-200 border-violet-600' : 'bg-gray-800/50 text-gray-400 border-gray-700 hover:text-white'}`}
+            className={`w-full flex items-center justify-center gap-2 py-2 rounded-lg text-sm transition-colors border ${activeView === 'course-quiz' ? 'bg-[#003CA6]/30 text-[#60c8f0] border-[#003CA6]' : 'bg-gray-800/50 text-gray-400 border-gray-700 hover:text-white'}`}
           >
             📝 Course Assessment
           </button>
@@ -177,10 +179,28 @@ export default function CourseEditor({ course, initialModules }: Props) {
           {/* Quiz Results shortcut */}
           <button
             onClick={() => { setActiveLesson(null); setActiveView('quiz-results') }}
-            className={`w-full flex items-center justify-center gap-2 py-2 rounded-lg text-sm transition-colors border ${activeView === 'quiz-results' ? 'bg-violet-600/30 text-violet-200 border-violet-600' : 'bg-gray-800/50 text-gray-400 border-gray-700 hover:text-white'}`}
+            className={`w-full flex items-center justify-center gap-2 py-2 rounded-lg text-sm transition-colors border ${activeView === 'quiz-results' ? 'bg-[#003CA6]/30 text-[#60c8f0] border-[#003CA6]' : 'bg-gray-800/50 text-gray-400 border-gray-700 hover:text-white'}`}
           >
             📊 Quiz Results
           </button>
+
+          <button
+            onClick={async () => {
+              setGeneratingOverview(true); setOverviewMsg('')
+              const res = await fetch(`/api/lms/courses/${course.id}/generate-overview`, {
+                method: 'POST',
+              })
+              const data = await res.json()
+              setOverviewMsg(data.error ? `Error: ${data.error}` : `✓ Overview generated`)
+              setGeneratingOverview(false)
+            }}
+            disabled={generatingOverview}
+            className="w-full flex items-center justify-center gap-2 py-2 rounded-lg text-sm transition-colors bg-cyan-900/30 text-cyan-300 border border-cyan-800/50 hover:bg-cyan-900/50 disabled:opacity-50"
+          >
+            {generatingOverview ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+            Generate Overview
+          </button>
+          {overviewMsg && <p className="text-xs text-center" style={{ color: overviewMsg.startsWith('Error') ? '#f87171' : '#86efac' }}>{overviewMsg}</p>}
 
           <button
             onClick={async () => {
@@ -199,7 +219,7 @@ export default function CourseEditor({ course, initialModules }: Props) {
               setAutoGenerating(false)
             }}
             disabled={autoGenerating}
-            className="w-full flex items-center justify-center gap-2 py-2 rounded-lg text-sm transition-colors bg-violet-900/30 text-violet-300 border border-violet-800/50 hover:bg-violet-900/50 disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-2 py-2 rounded-lg text-sm transition-colors bg-[#003CA6]/15 text-[#00A3E0] border border-[#003CA6]/50 hover:bg-violet-900/50 disabled:opacity-50"
           >
             {autoGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
             Auto-Generate Quiz
@@ -208,7 +228,7 @@ export default function CourseEditor({ course, initialModules }: Props) {
           <button onClick={() => { setPublished(!published) }} className={`w-full flex items-center justify-center gap-2 py-2 rounded-lg text-sm transition-colors ${published ? 'bg-green-900/30 text-green-400 border border-green-800/50' : 'bg-gray-800 text-gray-400 border border-gray-700'}`}>
             {published ? <><Globe className="w-4 h-4" /> Published</> : <><EyeOff className="w-4 h-4" /> Draft</>}
           </button>
-          <button onClick={saveSettings} disabled={saving} className="w-full flex items-center justify-center gap-2 py-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white rounded-lg text-sm font-medium transition-colors">
+          <button onClick={saveSettings} disabled={saving} className="w-full flex items-center justify-center gap-2 py-2 bg-[#003CA6] hover:bg-[#0048CC] disabled:opacity-50 text-white rounded-lg text-sm font-medium transition-colors">
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save
           </button>
         </div>
@@ -225,7 +245,7 @@ export default function CourseEditor({ course, initialModules }: Props) {
                 <div className="flex gap-1 flex-shrink-0">
                   {(['content', 'quiz'] as const).map(t => (
                     <button key={t} onClick={() => setActiveTab(t)}
-                      className={`px-3 py-1 rounded-lg text-xs capitalize transition-colors ${activeTab === t ? 'bg-violet-600 text-white' : 'text-gray-400 hover:text-white'}`}>
+                      className={`px-3 py-1 rounded-lg text-xs capitalize transition-colors ${activeTab === t ? 'bg-[#003CA6] text-white' : 'text-gray-400 hover:text-white'}`}>
                       {t}
                     </button>
                   ))}
@@ -233,7 +253,7 @@ export default function CourseEditor({ course, initialModules }: Props) {
               </div>
               <div className="flex items-center gap-2 ml-4">
                 <Link href={`/lms/course/${course.id}`} className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"><Eye className="w-4 h-4" /></Link>
-                <button onClick={saveLesson} disabled={saving} className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white rounded-lg text-sm transition-colors">
+                <button onClick={saveLesson} disabled={saving} className="flex items-center gap-1.5 px-3 py-1.5 bg-[#003CA6] hover:bg-[#0048CC] disabled:opacity-50 text-white rounded-lg text-sm transition-colors">
                   {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />} Save
                 </button>
               </div>
@@ -276,7 +296,7 @@ export default function CourseEditor({ course, initialModules }: Props) {
                       placeholder="Write lesson content in Markdown..."
                       className="w-full sm:w-1/2 h-48 sm:h-full bg-gray-950 text-gray-300 text-sm p-6 resize-none focus:outline-none border-b sm:border-b-0 sm:border-r border-gray-800 font-mono leading-relaxed" />
                     <div className="w-full sm:w-1/2 overflow-y-auto p-6">
-                      <article className="prose prose-invert prose-headings:text-white prose-p:text-gray-300 prose-li:text-gray-300 prose-strong:text-white prose-code:text-violet-300 max-w-none text-sm">
+                      <article className="prose prose-invert prose-headings:text-white prose-p:text-gray-300 prose-li:text-gray-300 prose-strong:text-white prose-code:text-[#00A3E0] max-w-none text-sm">
                         <ReactMarkdown>{lessonContent || '*Start writing to see a preview...*'}</ReactMarkdown>
                       </article>
                     </div>

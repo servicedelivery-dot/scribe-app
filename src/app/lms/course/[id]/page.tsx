@@ -87,6 +87,36 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
         </div>
       )}
 
+      {/* AI Overview card */}
+      {course.aiOverview && (() => {
+        try {
+          const ov = JSON.parse(course.aiOverview) as { summary?: string; points?: string[] }
+          if (!ov.points?.length) return null
+          return (
+            <div className="mb-6 rounded-2xl p-5" style={{ background: '#0a1628', border: '1px solid #152035' }}>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-sm">✨</span>
+                <h3 className="text-xs font-semibold uppercase tracking-wide" style={{ color: '#4e6680' }}>Course Overview</h3>
+              </div>
+              {ov.summary && (
+                <p className="text-sm mb-3 leading-relaxed" style={{ color: '#94a3b8' }}>{ov.summary}</p>
+              )}
+              <ul className="space-y-2">
+                {ov.points.map((point, i) => (
+                  <li key={i} className="flex items-start gap-2.5">
+                    <span className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-xs font-bold"
+                      style={{ background: 'rgba(0,163,224,0.15)', color: '#00A3E0' }}>
+                      {i + 1}
+                    </span>
+                    <span className="text-sm" style={{ color: '#cbd5e1' }}>{point}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )
+        } catch { return null }
+      })()}
+
       {/* Deadline banner */}
       {dueDate && (
         <div className="mb-6 rounded-xl p-4 flex items-center gap-3"

@@ -19,7 +19,7 @@ export default function CourseEnrollButton({ courseId }: { courseId: string }) {
     <button
       onClick={enroll}
       disabled={loading}
-      className="px-6 py-2.5 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white rounded-xl font-medium transition-colors flex items-center gap-2"
+      className="px-6 py-2.5 bg-[#003CA6] hover:bg-[#0048CC] disabled:opacity-50 text-white rounded-xl font-medium transition-colors flex items-center gap-2"
     >
       {loading && <Loader2 className="w-4 h-4 animate-spin" />}
       Enroll Now

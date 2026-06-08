@@ -25,7 +25,7 @@ function daysLeft(d: Date | string | null) {
 // ── Gradient palettes for course cards ────────────────────────────────────────
 const GRADIENTS = [
   'from-blue-900/60 to-indigo-950',
-  'from-violet-900/60 to-purple-950',
+  'from-blue-900/60 to-blue-950',
   'from-cyan-900/60 to-blue-950',
   'from-teal-900/60 to-emerald-950',
   'from-rose-900/50 to-red-950',
@@ -124,7 +124,7 @@ export default async function LmsPage() {
 
     const stats = [
       { label: 'Published Courses', value: publishedCount, icon: <BookOpen className="w-5 h-5" />, color: '#003CA6', bg: 'rgba(0,60,166,0.12)' },
-      { label: 'Team Members', value: totalLearners.count, icon: <Users className="w-5 h-5" />, color: '#7c3aed', bg: 'rgba(124,58,237,0.12)' },
+      { label: 'Team Members', value: totalLearners.count, icon: <Users className="w-5 h-5" />, color: '#00A3E0', bg: 'rgba(0,163,224,0.12)' },
       { label: 'Enrollments', value: totalEnrollments.count, icon: <TrendingUp className="w-5 h-5" />, color: '#059669', bg: 'rgba(5,150,105,0.12)' },
       { label: 'Certificates', value: totalCerts.count, icon: <Award className="w-5 h-5" />, color: '#d97706', bg: 'rgba(217,119,6,0.12)' },
     ]
@@ -263,7 +263,7 @@ export default async function LmsPage() {
 
   const stats = [
     { icon: <BookOpen className="w-5 h-5" />, label: 'Enrolled', val: enrolled.length, color: '#003CA6', bg: 'rgba(0,60,166,0.12)' },
-    { icon: <TrendingUp className="w-5 h-5" />, label: 'In Progress', val: inProgress.length, color: '#7c3aed', bg: 'rgba(124,58,237,0.12)' },
+    { icon: <TrendingUp className="w-5 h-5" />, label: 'In Progress', val: inProgress.length, color: '#00A3E0', bg: 'rgba(0,163,224,0.12)' },
     { icon: <CheckCircle className="w-5 h-5" />, label: 'Lessons Done', val: totalLessonsCompleted, color: '#059669', bg: 'rgba(5,150,105,0.12)' },
     { icon: <Award className="w-5 h-5" />, label: 'Certificates', val: certs.length, color: '#d97706', bg: 'rgba(217,119,6,0.12)' },
   ]
@@ -436,7 +436,7 @@ function CourseCard({ course }: { course: {
               <div className="h-full rounded-full transition-all duration-500"
                 style={{
                   width: `${course.pct}%`,
-                  background: course.pct === 100 ? '#10b981' : course.overdue ? '#ef4444' : '#7c3aed',
+                  background: course.pct === 100 ? '#10b981' : course.overdue ? '#ef4444' : '#003CA6',
                 }} />
             </div>
             <p className="text-xs mt-1.5" style={{ color: '#334155' }}>

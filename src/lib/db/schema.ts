@@ -43,6 +43,7 @@ export const lmsCourses = pgTable('lms_courses', {
   sourceGeneratedId: uuid('source_generated_id'),
   passScoreRequired: integer('pass_score_required').default(70).notNull(), // % to pass quiz
   prerequisiteCourseId: uuid('prerequisite_course_id'),                    // must complete this first
+  aiOverview: text('ai_overview'),                                          // JSON: { summary, points[] }
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
@@ -159,7 +159,7 @@ export default function LessonViewer({ course, currentLesson, modules, nextLesso
           <h2 className="font-semibold text-white text-sm line-clamp-2">{course.emoji} {course.title}</h2>
           <div className="mt-2">
             <div className="w-full bg-gray-800 rounded-full h-1.5">
-              <div className="bg-violet-500 h-1.5 rounded-full" style={{ width: `${progress}%` }} />
+              <div className="bg-[#0048CC] h-1.5 rounded-full" style={{ width: `${progress}%` }} />
             </div>
             <p className="text-xs text-gray-500 mt-1">{completedCount}/{totalLessons} completed</p>
           </div>
@@ -172,7 +172,7 @@ export default function LessonViewer({ course, currentLesson, modules, nextLesso
                 <Link
                   key={lesson.id}
                   href={`/lms/learn/${course.id}/${lesson.id}`}
-                  className={`flex items-center gap-3 px-4 py-3 border-b border-gray-800 text-sm transition-colors ${lesson.id === currentLesson.id ? 'bg-violet-600/20 text-violet-300' : 'text-gray-400 hover:text-white hover:bg-gray-800'}`}
+                  className={`flex items-center gap-3 px-4 py-3 border-b border-gray-800 text-sm transition-colors ${lesson.id === currentLesson.id ? 'bg-[#003CA6]/20 text-[#00A3E0]' : 'text-gray-400 hover:text-white hover:bg-gray-800'}`}
                 >
                   <div className={`w-5 h-5 rounded-full border flex-shrink-0 flex items-center justify-center ${lesson.completed ? 'bg-green-500 border-green-500' : 'border-gray-600'}`}>
                     {lesson.completed && <CheckCircle className="w-3.5 h-3.5 text-white fill-white" />}
@@ -346,7 +346,7 @@ export default function LessonViewer({ course, currentLesson, modules, nextLesso
                 )}
               </div>
             ) : (
-            <article className="prose prose-invert prose-headings:text-white prose-p:text-gray-300 prose-li:text-gray-300 prose-strong:text-white prose-code:text-violet-300 max-w-none">
+            <article className="prose prose-invert prose-headings:text-white prose-p:text-gray-300 prose-li:text-gray-300 prose-strong:text-white prose-code:text-[#00A3E0] max-w-none">
               {currentLesson.content ? (
                 <ReactMarkdown>{currentLesson.content}</ReactMarkdown>
               ) : (
@@ -365,14 +365,14 @@ export default function LessonViewer({ course, currentLesson, modules, nextLesso
 
             {/* End-of-course quiz gate */}
             {isLastLesson && !showEndQuiz && !quizPassed && endOfCourseQuiz.length > 0 && completed && (
-              <div className="mt-8 p-5 bg-violet-900/20 border border-violet-700/50 rounded-xl text-center">
+              <div className="mt-8 p-5 bg-[#003CA6]/10 border border-[#003CA6]/40 rounded-xl text-center">
                 <div className="text-3xl mb-3">🎓</div>
                 <h3 className="text-white font-semibold mb-2">You've reached the final assessment</h3>
                 <p className="text-gray-400 text-sm mb-4">
                   Pass the quiz with {course.passScoreRequired ?? 70}% or higher to complete this course and earn your certificate.
                 </p>
                 <button onClick={() => setShowEndQuiz(true)}
-                  className="px-6 py-2.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-medium transition-colors">
+                  className="px-6 py-2.5 bg-[#003CA6] hover:bg-[#0048CC] text-white rounded-xl font-medium transition-colors">
                   Start Final Quiz ({endOfCourseQuiz.length} questions)
                 </button>
               </div>
@@ -411,7 +411,7 @@ export default function LessonViewer({ course, currentLesson, modules, nextLesso
               </button>
             )}
             {nextLesson ? (
-              <button onClick={completeAndNext} className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-lg text-sm font-medium transition-colors">
+              <button onClick={completeAndNext} className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-[#003CA6] hover:bg-[#0048CC] text-white rounded-lg text-sm font-medium transition-colors">
                 Next <ChevronRight className="w-4 h-4" />
               </button>
             ) : completed ? (
