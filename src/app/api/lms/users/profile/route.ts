@@ -35,18 +35,31 @@ export async function GET() {
   })
 }
 
+async function upsertProfile(userId: string, body: Record<string, unknown>) {
+  const s = (k: string) => typeof body[k] === 'string' ? body[k] as string : undefined
+  const fields = {
+    firstName: s('firstName'), lastName: s('lastName'), department: s('department'),
+    jobTitle: s('jobTitle'), phone: s('phone'), supplierCompany: s('supplierCompany'), notes: s('notes'),
+    ...(body.onboardingComplete !== undefined ? { onboardingComplete: Boolean(body.onboardingComplete) } : {}),
+  }
+  const existing = await db.select().from(lmsUserProfiles).where(eq(lmsUserProfiles.userId, userId))
+  if (existing.length) {
+    await db.update(lmsUserProfiles).set({ ...fields, updatedAt: new Date() }).where(eq(lmsUserProfiles.userId, userId))
+  } else {
+    await db.insert(lmsUserProfiles).values({ userId, ...fields })
+  }
+}
+
 export async function PATCH(req: Request) {
   const { userId } = await auth()
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  await upsertProfile(userId, await req.json())
+  return NextResponse.json({ success: true })
+}
 
-  const { firstName, lastName, department, jobTitle, phone } = await req.json()
-
-  const existing = await db.select().from(lmsUserProfiles).where(eq(lmsUserProfiles.userId, userId))
-  if (existing.length) {
-    await db.update(lmsUserProfiles).set({ firstName, lastName, department, jobTitle, phone, updatedAt: new Date() })
-      .where(eq(lmsUserProfiles.userId, userId))
-  } else {
-    await db.insert(lmsUserProfiles).values({ userId, firstName, lastName, department, jobTitle, phone })
-  }
+export async function POST(req: Request) {
+  const { userId } = await auth()
+  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  await upsertProfile(userId, await req.json())
   return NextResponse.json({ success: true })
 }

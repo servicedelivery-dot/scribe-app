@@ -121,7 +121,7 @@ export default function ImportLesson({ courses, allModules }: { courses: Course[
     let fileContent = content
 
     // Upload file if present
-    if (file && (importType === 'pdf' || importType === 'docx')) {
+    if (file && (importType === 'pdf' || importType === 'docx' || importType === 'video')) {
       uploadedUrl = await uploadFile(file)
     }
 

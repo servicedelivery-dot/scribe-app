@@ -19,6 +19,13 @@ export const ourFileRouter = {
     .onUploadComplete(async ({ file }) => {
       return { url: file.url, name: file.name, type: file.type }
     }),
+
+  // For course lesson videos — stored directly in the course, 512MB cap keeps sizes sane
+  lessonVideoUploader: f({ video: { maxFileSize: '512MB', maxFileCount: 1 } })
+    .middleware(async () => ({ userId: 'unused' }))
+    .onUploadComplete(async ({ file }) => {
+      return { url: file.url, name: file.name, type: file.type }
+    }),
 } satisfies FileRouter
 
 export type OurFileRouter = typeof ourFileRouter

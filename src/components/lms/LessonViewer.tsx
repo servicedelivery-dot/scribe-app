@@ -287,13 +287,46 @@ export default function LessonViewer({ course, currentLesson, modules, nextLesso
                     </button>
                   ))}
                 </div>
-                <iframe
-                  key={scribeMode}
-                  src={scribeMode === 'slides' ? scribeData.slides : scribeMode === 'movie' ? scribeData.movie : scribeData.scroll}
-                  width="100%"
-                  style={{ border: 0, borderRadius: 12, minHeight: 'clamp(300px, 50vw, 560px)', display: 'block' }}
-                  allow="fullscreen"
-                />
+
+                {/* Movie tab: native player for direct video files, iframe for Scribe embed URLs */}
+                {scribeMode === 'movie' && scribeData.movie && /\.(mp4|webm|mov|ogg)(\?|$)/i.test(scribeData.movie) ? (
+                  <div className="space-y-3">
+                    {videoResumePos > 10 && (
+                      <div className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm"
+                        style={{ background: 'rgba(0,163,224,0.1)', border: '1px solid rgba(0,163,224,0.2)', color: '#00A3E0' }}>
+                        ▶ Resuming from {formatTime(videoResumePos)}
+                      </div>
+                    )}
+                    <video
+                      ref={videoRef}
+                      src={scribeData.movie}
+                      controls
+                      className="w-full rounded-xl"
+                      style={{ maxHeight: 520, background: '#000', border: '1px solid #1e3a6e' }}
+                      onTimeUpdate={handleVideoTimeUpdate}
+                      onLoadedMetadata={handleVideoLoaded}
+                    />
+                    {videoDuration > 0 && (
+                      <div className="space-y-1.5">
+                        <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: '#1e293b' }}>
+                          <div className="h-full rounded-full transition-all" style={{ width: `${videoProgress}%`, background: videoProgress >= 90 ? '#10b981' : '#003CA6' }} />
+                        </div>
+                        <div className="flex items-center justify-between text-xs" style={{ color: '#475569' }}>
+                          <span>{videoProgress}% watched</span>
+                          <span>{videoProgress >= 90 ? '✅ Completed' : `${formatTime(Math.max(0, videoDuration - (videoDuration * videoProgress / 100)))} left`}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <iframe
+                    key={scribeMode}
+                    src={scribeMode === 'slides' ? scribeData.slides : scribeMode === 'movie' ? scribeData.movie : scribeData.scroll}
+                    width="100%"
+                    style={{ border: 0, borderRadius: 12, minHeight: 'clamp(300px, 50vw, 560px)', display: 'block' }}
+                    allow="fullscreen"
+                  />
+                )}
               </div>
             ) : (
             <article className="prose prose-invert prose-headings:text-white prose-p:text-gray-300 prose-li:text-gray-300 prose-strong:text-white prose-code:text-violet-300 max-w-none">

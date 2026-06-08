@@ -1,9 +1,9 @@
-import { auth } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@clerk/nextjs/server'
 import { db } from '@/lib/db'
 import {
   lmsCourses, lmsEnrollments, lmsLessons, lmsProgress,
   lmsCourseAssignments, lmsCertificates,
-  lmsUserGroups, lmsCourseGroups, lmsGroups, lmsUserRoles,
+  lmsUserGroups, lmsCourseGroups, lmsGroups, lmsUserRoles, lmsUserProfiles,
 } from '@/lib/db/schema'
 import { eq, count, desc, inArray } from 'drizzle-orm'
 import Link from 'next/link'
@@ -13,6 +13,7 @@ import {
   Layers, ChevronRight,
 } from 'lucide-react'
 import CourseEnrollButton from '@/components/lms/CourseEnrollButton'
+import OnboardingWizard from '@/components/lms/OnboardingWizard'
 
 export const dynamic = 'force-dynamic'
 
@@ -43,9 +44,14 @@ export default async function LmsPage() {
   const { userId } = await auth()
   if (!userId) return null
 
+  const clerkUser = await currentUser()
   const [roleRow] = await db.select().from(lmsUserRoles).where(eq(lmsUserRoles.userId, userId))
   const role = roleRow?.role ?? 'learner'
   const isAdmin = ['owner', 'admin', 'manager'].includes(role)
+
+  // Check if new joiner needs onboarding
+  const [profileRow] = await db.select().from(lmsUserProfiles).where(eq(lmsUserProfiles.userId, userId))
+  const needsOnboarding = !isAdmin && (!profileRow || !profileRow.onboardingComplete)
 
   // ── Group-based visibility (learner) ────────────────────────────────────────
   let allowedCourseIds: string[] | null = null
@@ -264,6 +270,9 @@ export default async function LmsPage() {
 
   return (
     <div className="p-5 sm:p-8 max-w-5xl">
+      {needsOnboarding && (
+        <OnboardingWizard userName={clerkUser?.firstName || clerkUser?.emailAddresses?.[0]?.emailAddress || 'there'} />
+      )}
 
       {/* Header */}
       <div className="mb-7">

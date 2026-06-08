@@ -135,6 +135,8 @@ export const lmsUserProfiles = pgTable('lms_user_profiles', {
   phone: text('phone'),
   notes: text('notes'),
   tempPassword: text('temp_password'),
+  supplierCompany: text('supplier_company'),
+  onboardingComplete: boolean('onboarding_complete').default(false).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
@@ -245,6 +247,23 @@ export const lmsCourseFeedback = pgTable('lms_course_feedback', {
   rating: integer('rating').notNull(), // 1-5
   comment: text('comment'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
+})
+
+// ── Knowledge Base Articles ───────────────────────────────────────────────────
+export const lmsArticles = pgTable('lms_articles', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  title: text('title').notNull(),
+  content: text('content').notNull(),
+  category: text('category').notNull().default('General'),
+  tags: jsonb('tags').notNull().$type<string[]>().default([]),
+  emoji: text('emoji').default('📄').notNull(),
+  authorId: text('author_id').notNull(),
+  authorName: text('author_name').notNull(),
+  published: boolean('published').default(false).notNull(),
+  pinned: boolean('pinned').default(false).notNull(),
+  estimatedReadMins: integer('estimated_read_mins').default(3).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
 
 // ── Announcements ─────────────────────────────────────────────────────────────

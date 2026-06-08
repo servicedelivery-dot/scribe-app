@@ -12,7 +12,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   if (!['owner', 'admin'].includes(requester?.role ?? '')) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const { id: targetId } = await params
-  const { displayName, role, department, jobTitle, phone, notes } = await req.json()
+  const { displayName, role, department, jobTitle, phone, notes, supplierCompany } = await req.json()
 
   // Update role + displayName in lmsUserRoles
   const existingRole = await db.select().from(lmsUserRoles).where(eq(lmsUserRoles.userId, targetId))
@@ -25,9 +25,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   // Update profile in lmsUserProfiles
   const existingProfile = await db.select().from(lmsUserProfiles).where(eq(lmsUserProfiles.userId, targetId))
   if (existingProfile.length) {
-    await db.update(lmsUserProfiles).set({ department, jobTitle, phone, notes, updatedAt: new Date() }).where(eq(lmsUserProfiles.userId, targetId))
+    await db.update(lmsUserProfiles).set({ department, jobTitle, phone, notes, supplierCompany, updatedAt: new Date() }).where(eq(lmsUserProfiles.userId, targetId))
   } else {
-    await db.insert(lmsUserProfiles).values({ userId: targetId, department, jobTitle, phone, notes })
+    await db.insert(lmsUserProfiles).values({ userId: targetId, department, jobTitle, phone, notes, supplierCompany })
   }
 
   return NextResponse.json({ success: true })

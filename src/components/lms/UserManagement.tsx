@@ -50,7 +50,7 @@ export default function UserManagement({ initialUsers, currentRole }: { initialU
   const [courses, setCourses] = useState<Course[]>([])
   const [showBulk, setShowBulk] = useState(false)
   const [editUser, setEditUser] = useState<User | null>(null)
-  const [editForm, setEditForm] = useState({ displayName: '', role: 'learner' as Role, department: '', jobTitle: '', phone: '', notes: '' })
+  const [editForm, setEditForm] = useState({ displayName: '', role: 'learner' as Role, department: '', jobTitle: '', phone: '', notes: '', supplierCompany: '' })
   const [editLoading, setEditLoading] = useState(false)
   const [editMsg, setEditMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
   const [editFetching, setEditFetching] = useState(false)
@@ -183,7 +183,7 @@ export default function UserManagement({ initialUsers, currentRole }: { initialU
   async function openEdit(user: User) {
     setEditUser(user)
     setEditMsg(null)
-    setEditForm({ displayName: user.name, role: user.role, department: '', jobTitle: '', phone: '', notes: '' })
+    setEditForm({ displayName: user.name, role: user.role, department: '', jobTitle: '', phone: '', notes: '', supplierCompany: '' })
     setEditFetching(true)
     try {
       const res = await fetch(`/api/lms/users/${user.id}`)
@@ -196,6 +196,7 @@ export default function UserManagement({ initialUsers, currentRole }: { initialU
         jobTitle: data.profile?.jobTitle ?? '',
         phone: data.profile?.phone ?? '',
         notes: data.profile?.notes ?? '',
+        supplierCompany: data.profile?.supplierCompany ?? '',
       }))
     } finally {
       setEditFetching(false)
@@ -806,6 +807,12 @@ export default function UserManagement({ initialUsers, currentRole }: { initialU
                       <label className="text-xs uppercase tracking-wide block mb-1" style={{ color: '#64748b' }}>Phone</label>
                       <input type="tel" value={editForm.phone} onChange={e => setEditForm(f => ({ ...f, phone: e.target.value }))}
                         placeholder="+44 7700 900000" className="w-full px-3 py-2 text-sm text-white rounded-lg focus:outline-none"
+                        style={{ background: '#091525', border: `1px solid ${ap.border}` }} />
+                    </div>
+                    <div className="mt-3">
+                      <label className="text-xs uppercase tracking-wide block mb-1" style={{ color: '#64748b' }}>Supplier / Company</label>
+                      <input value={editForm.supplierCompany} onChange={e => setEditForm(f => ({ ...f, supplierCompany: e.target.value }))}
+                        placeholder="e.g. DHL, FedEx, Own Fleet…" className="w-full px-3 py-2 text-sm text-white rounded-lg focus:outline-none"
                         style={{ background: '#091525', border: `1px solid ${ap.border}` }} />
                     </div>
                     <div className="mt-3">

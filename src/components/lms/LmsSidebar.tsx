@@ -7,7 +7,7 @@ import {
   LayoutDashboard, BookOpen, BarChart2, Users, Award, Megaphone, TrendingUp,
   GraduationCap, UserCircle, Library, Layers, Calendar, AlertTriangle,
   ClipboardCheck, Activity, Upload, BarChart, Star, Bell, Route, Settings,
-  ChevronLeft, ChevronRight,
+  ChevronLeft, ChevronRight, FileText,
 } from 'lucide-react'
 import { UserButton } from '@clerk/nextjs'
 import Image from 'next/image'
@@ -26,6 +26,7 @@ const sections: NavSection[] = [
   { label: 'My Learning', links: [
     { href: '/lms/profile', icon: <UserCircle className="w-4 h-4" />, label: 'My Courses', roles: ['learner'] },
     { href: '/lms/certificates', icon: <Award className="w-4 h-4" />, label: 'Certificates', roles: ['owner', 'admin', 'manager', 'learner'] },
+    { href: '/lms/articles', icon: <FileText className="w-4 h-4" />, label: 'Knowledge Base', roles: ['owner', 'admin', 'manager', 'learner'] },
     { href: '/lms/notifications', icon: <Bell className="w-4 h-4" />, label: 'Notifications', roles: ['owner', 'admin', 'manager', 'learner'] },
   ]},
   { label: 'Manage', links: [
