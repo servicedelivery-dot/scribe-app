@@ -1,12 +1,12 @@
 import { auth } from '@clerk/nextjs/server'
 import { notFound } from 'next/navigation'
 import { db } from '@/lib/db'
-import { lmsCourses, lmsModules, lmsLessons, lmsEnrollments, lmsProgress, lmsCertificates, lmsQuizQuestions, lmsCourseFeedback } from '@/lib/db/schema'
+import { lmsCourses, lmsModules, lmsLessons, lmsEnrollments, lmsProgress, lmsCertificates, lmsQuizQuestions, lmsCourseFeedback, lmsCourseAssignments } from '@/lib/db/schema'
 import { eq, and, asc, count, isNull } from 'drizzle-orm'
 import Link from 'next/link'
 import CourseEnrollButton from '@/components/lms/CourseEnrollButton'
 import CourseFeedbackWidget from '@/components/lms/CourseFeedbackWidget'
-import { BookOpen, CheckCircle, Award, Users, Lock } from 'lucide-react'
+import { BookOpen, CheckCircle, Award, Users, Lock, Clock } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -56,6 +56,13 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
 
   const pct = lessons.length > 0 ? Math.round(completedIds.size / lessons.length * 100) : 0
 
+  const [assignment] = userId
+    ? await db.select().from(lmsCourseAssignments).where(and(eq(lmsCourseAssignments.userId, userId!), eq(lmsCourseAssignments.courseId, id)))
+    : []
+  const dueDate = assignment?.dueDate ?? null
+  const daysLeft = dueDate ? Math.ceil((new Date(dueDate).getTime() - Date.now()) / 86400000) : null
+  const isOverdue = daysLeft !== null && daysLeft < 0
+
   return (
     <div className="max-w-3xl mx-auto p-4 sm:p-8">
       {/* Header */}
@@ -77,6 +84,32 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
             <div className="bg-violet-500 h-2 rounded-full transition-all" style={{ width: `${pct}%` }} />
           </div>
           <p className="text-xs text-gray-500 mt-1">{pct}% complete</p>
+        </div>
+      )}
+
+      {/* Deadline banner */}
+      {dueDate && (
+        <div className="mb-6 rounded-xl p-4 flex items-center gap-3"
+          style={{
+            background: isOverdue ? 'rgba(239,68,68,0.07)' : 'rgba(251,191,36,0.07)',
+            border: `1px solid ${isOverdue ? 'rgba(239,68,68,0.25)' : 'rgba(251,191,36,0.25)'}`,
+          }}>
+          <div className="w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center"
+            style={{ background: isOverdue ? 'rgba(239,68,68,0.15)' : 'rgba(251,191,36,0.1)' }}>
+            <Clock className="w-4 h-4" style={{ color: isOverdue ? '#f87171' : '#fbbf24' }} />
+          </div>
+          <div>
+            <p className="text-sm font-semibold" style={{ color: isOverdue ? '#fca5a5' : '#fde68a' }}>
+              {isOverdue
+                ? `Overdue by ${Math.abs(daysLeft!)} day${Math.abs(daysLeft!) !== 1 ? 's' : ''}`
+                : daysLeft === 0 ? 'Due today'
+                : daysLeft === 1 ? 'Due tomorrow'
+                : `Due in ${daysLeft} days`}
+            </p>
+            <p className="text-xs mt-0.5" style={{ color: isOverdue ? '#fca5a5' : '#fde68a', opacity: 0.7 }}>
+              Deadline: {new Date(dueDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+            </p>
+          </div>
         </div>
       )}
 

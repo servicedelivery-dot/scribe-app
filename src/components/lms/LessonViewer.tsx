@@ -20,9 +20,10 @@ interface Props {
   completedCount: number
   totalLessons: number
   isLastLesson?: boolean
+  courseDueDate?: string | null
 }
 
-export default function LessonViewer({ course, currentLesson, modules, nextLesson, prevLesson, completedCount, totalLessons, isLastLesson }: Props) {
+export default function LessonViewer({ course, currentLesson, modules, nextLesson, prevLesson, completedCount, totalLessons, isLastLesson, courseDueDate }: Props) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [marking, setMarking] = useState(false)
   const [completed, setCompleted] = useState(currentLesson.completed)
@@ -192,6 +193,22 @@ export default function LessonViewer({ course, currentLesson, modules, nextLesso
             {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
           <span className="text-gray-400 text-sm truncate flex-1 min-w-0">{currentLesson.title}</span>
+          {courseDueDate && (() => {
+            const dl = Math.ceil((new Date(courseDueDate).getTime() - Date.now()) / 86400000)
+            const overdue = dl < 0
+            return (
+              <span
+                className="flex items-center gap-1 text-xs flex-shrink-0 font-medium px-2 py-1 rounded-lg"
+                style={{
+                  background: overdue ? 'rgba(239,68,68,0.15)' : 'rgba(251,191,36,0.1)',
+                  color: overdue ? '#f87171' : '#fbbf24',
+                }}
+              >
+                <Clock className="w-3 h-3" />
+                {overdue ? `${Math.abs(dl)}d overdue` : dl === 0 ? 'Due today' : dl === 1 ? 'Due tomorrow' : `Due in ${dl}d`}
+              </span>
+            )
+          })()}
           {completed && <span className="flex items-center gap-1 text-green-400 text-xs"><CheckCircle className="w-3.5 h-3.5" /> Completed</span>}
         </div>
 
