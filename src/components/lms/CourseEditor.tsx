@@ -27,7 +27,7 @@ export default function CourseEditor({ course, initialModules }: Props) {
   const [published, setPublished] = useState(course.published)
   const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set(initialModules.map(m => m.id)))
   const [activeLesson, setActiveLesson] = useState<Lesson | null>(null)
-  const [activeView, setActiveView] = useState<'lesson' | 'course-quiz' | 'quiz-results' | 'course-qr'>('lesson')
+  const [activeView, setActiveView] = useState<'lesson' | 'course-quiz' | 'quiz-results' | 'course-qr'>('course-qr')
   const [lessonContent, setLessonContent] = useState('')
   const [lessonTitle, setLessonTitle] = useState('')
   const [activeTab, setActiveTab] = useState<'content' | 'quiz' | 'qr'>('content')
