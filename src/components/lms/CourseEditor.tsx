@@ -9,6 +9,7 @@ import QuizEditor from './QuizEditor'
 import QuizResults from './QuizResults'
 import VideoMetricsPanel from './VideoMetricsPanel'
 import LessonQRPanel from './LessonQRPanel'
+import CourseQRPanel from './CourseQRPanel'
 
 interface Lesson { id: string; title: string; content: string; orderIndex: number; moduleId: string; courseId: string }
 interface Module { id: string; title: string; orderIndex: number; courseId: string; lessons: Lesson[] }
@@ -26,7 +27,7 @@ export default function CourseEditor({ course, initialModules }: Props) {
   const [published, setPublished] = useState(course.published)
   const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set(initialModules.map(m => m.id)))
   const [activeLesson, setActiveLesson] = useState<Lesson | null>(null)
-  const [activeView, setActiveView] = useState<'lesson' | 'course-quiz' | 'quiz-results'>('lesson')
+  const [activeView, setActiveView] = useState<'lesson' | 'course-quiz' | 'quiz-results' | 'course-qr'>('lesson')
   const [lessonContent, setLessonContent] = useState('')
   const [lessonTitle, setLessonTitle] = useState('')
   const [activeTab, setActiveTab] = useState<'content' | 'quiz' | 'qr'>('content')
@@ -169,6 +170,14 @@ export default function CourseEditor({ course, initialModules }: Props) {
 
         {/* Bottom actions */}
         <div className="p-3 border-t border-gray-800 space-y-2">
+
+          {/* QR Upload — always visible, course level */}
+          <button
+            onClick={() => { setActiveLesson(null); setActiveView('course-qr') }}
+            className={`w-full flex items-center justify-center gap-2 py-2 rounded-lg text-sm transition-colors border ${activeView === 'course-qr' ? 'bg-[#003CA6]/30 text-[#60c8f0] border-[#003CA6]' : 'bg-[#003CA6]/10 text-[#00A3E0] border-[#003CA6]/40 hover:bg-[#003CA6]/20'}`}
+          >
+            📷 QR Upload
+          </button>
 
           {/* Course Assessment shortcut */}
           <button
@@ -313,6 +322,18 @@ export default function CourseEditor({ course, initialModules }: Props) {
               </div>
             )}
           </>
+        ) : activeView === 'course-qr' ? (
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <div className="h-14 bg-gray-900 border-b border-gray-800 flex items-center px-5 gap-3">
+              <span className="text-white font-semibold text-sm">📷 QR Upload</span>
+              <span className="text-xs text-gray-500">Scan the QR with a phone to add photos — then generate lessons with AI</span>
+            </div>
+            <CourseQRPanel
+              courseId={course.id}
+              courseTitle={title}
+              onLessonsGenerated={() => router.refresh()}
+            />
+          </div>
         ) : activeView === 'course-quiz' ? (
           <div className="flex-1 flex flex-col overflow-hidden">
             <div className="h-14 bg-gray-900 border-b border-gray-800 flex items-center px-5 gap-3">

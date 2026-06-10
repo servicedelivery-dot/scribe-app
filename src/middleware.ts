@@ -2,10 +2,12 @@ import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 
 // Routes accessible without any login
 const isPublic = createRouteMatcher([
-  '/upload(.*)',                        // QR screenshot upload — scanned from phone, no account needed
-  '/api/lms/lessons/(.*)/title',        // lesson title for QR upload page header
-  '/api/lms/lessons/(.*)/screenshots',  // POST from QR upload page, GET also kept open here
-  '/api/uploadthing(.*)',               // UploadThing file upload handler
+  '/upload(.*)',                           // QR upload pages — scanned from phone, no account needed
+  '/api/lms/lessons/(.*)/title',           // lesson title for QR page header
+  '/api/lms/lessons/(.*)/screenshots',     // POST from lesson QR upload page
+  '/api/lms/courses/(.*)/title',           // course title for QR page header
+  '/api/lms/courses/(.*)/screenshots',     // POST from course QR upload page
+  '/api/uploadthing(.*)',                  // UploadThing file handler
   '/sign-in(.*)',
   '/sign-up(.*)',
 ])

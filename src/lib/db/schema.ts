@@ -307,6 +307,16 @@ export const lmsLearningPathCourses = pgTable('lms_learning_path_courses', {
   orderIndex: integer('order_index').default(0).notNull(),
 })
 
+// ── Course Screenshots (uploaded via QR code at course level) ─────────────────
+export const lmsCourseScreenshots = pgTable('lms_course_screenshots', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  courseId: uuid('course_id').notNull().references(() => lmsCourses.id, { onDelete: 'cascade' }),
+  imageUrl: text('image_url').notNull(),
+  context: text('context').default('').notNull(),
+  uploadedBy: text('uploaded_by'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+})
+
 // ── Lesson Screenshots (uploaded via QR code) ─────────────────────────────────
 export const lmsLessonScreenshots = pgTable('lms_lesson_screenshots', {
   id: uuid('id').primaryKey().defaultRandom(),
