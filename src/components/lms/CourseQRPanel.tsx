@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
-import { RefreshCw, Trash2, Copy, Check, QrCode, Sparkles, Loader2 } from 'lucide-react'
+import { RefreshCw, Trash2, Copy, Check, QrCode, Sparkles, Loader2, RotateCcw } from 'lucide-react'
 
 interface Screenshot {
   id: string
@@ -19,14 +19,21 @@ interface Props {
 
 export default function CourseQRPanel({ courseId, courseTitle, onLessonsGenerated }: Props) {
   const [uploadUrl, setUploadUrl] = useState('')
+  const [token, setToken] = useState<string | null>(null)
   const [screenshots, setScreenshots] = useState<Screenshot[]>([])
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState(false)
   const [generating, setGenerating] = useState(false)
   const [genMsg, setGenMsg] = useState('')
+  const [regenerating, setRegenerating] = useState(false)
 
-  useEffect(() => {
-    setUploadUrl(`${window.location.origin}/upload/course/${courseId}`)
+  const fetchToken = useCallback(async () => {
+    const res = await fetch(`/api/lms/courses/${courseId}/upload-token`)
+    if (res.ok) {
+      const data = await res.json()
+      setToken(data.token)
+      setUploadUrl(`${window.location.origin}/upload/course/${courseId}?t=${data.token}`)
+    }
   }, [courseId])
 
   const fetchScreenshots = useCallback(async () => {
@@ -39,7 +46,21 @@ export default function CourseQRPanel({ courseId, courseTitle, onLessonsGenerate
     }
   }, [courseId])
 
-  useEffect(() => { fetchScreenshots() }, [fetchScreenshots])
+  useEffect(() => {
+    fetchToken()
+    fetchScreenshots()
+  }, [fetchToken, fetchScreenshots])
+
+  async function regenerateToken() {
+    setRegenerating(true)
+    const res = await fetch(`/api/lms/courses/${courseId}/upload-token`, { method: 'POST' })
+    if (res.ok) {
+      const data = await res.json()
+      setToken(data.token)
+      setUploadUrl(`${window.location.origin}/upload/course/${courseId}?t=${data.token}`)
+    }
+    setRegenerating(false)
+  }
 
   async function deleteScreenshot(screenshotId: string) {
     await fetch(`/api/lms/courses/${courseId}/screenshots`, {
@@ -61,14 +82,12 @@ export default function CourseQRPanel({ courseId, courseTitle, onLessonsGenerate
     setGenerating(true)
     setGenMsg('')
     try {
-      const res = await fetch(`/api/lms/courses/${courseId}/generate-from-screenshots`, {
-        method: 'POST',
-      })
+      const res = await fetch(`/api/lms/courses/${courseId}/generate-from-screenshots`, { method: 'POST' })
       const data = await res.json()
       if (data.error) {
         setGenMsg(`Error: ${data.error}`)
       } else {
-        setGenMsg(`✓ ${data.created} lesson${data.created !== 1 ? 's' : ''} created from your photos`)
+        setGenMsg(`✓ ${data.created} lesson${data.created !== 1 ? 's' : ''} created`)
         onLessonsGenerated?.()
       }
     } catch {
@@ -83,12 +102,27 @@ export default function CourseQRPanel({ courseId, courseTitle, onLessonsGenerate
 
       {/* QR Section */}
       <div className="rounded-2xl p-5 space-y-4" style={{ background: '#0a1628', border: '1px solid #1e3a6e' }}>
-        <div className="flex items-center gap-2">
-          <QrCode className="w-4 h-4" style={{ color: '#00A3E0' }} />
-          <span className="text-white font-semibold text-sm">Scan to add content</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <QrCode className="w-4 h-4" style={{ color: '#00A3E0' }} />
+            <span className="text-white font-semibold text-sm">Scan to add content</span>
+          </div>
+          <button
+            onClick={regenerateToken}
+            disabled={regenerating}
+            title="Regenerate link — invalidates the old QR"
+            className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg transition-colors disabled:opacity-50"
+            style={{ color: '#475569', background: '#0d1f38' }}
+          >
+            <RotateCcw className={`w-3 h-3 ${regenerating ? 'animate-spin' : ''}`} />
+            New link
+          </button>
         </div>
-        <p className="text-xs text-gray-500 leading-relaxed">
-          Share this QR with anyone who has course materials — they scan it, photograph notes, screens, or documents, add context, and AI builds lessons from what they submit.
+
+        <p className="text-xs leading-relaxed" style={{ color: '#64748b' }}>
+          Share with anyone who has course materials. They scan, photograph notes or screens, add context — AI builds the lessons.
+          <br />
+          <span style={{ color: '#334155' }}>Token-secured: only scans with the correct link are accepted.</span>
         </p>
 
         {/* QR code */}
@@ -98,15 +132,15 @@ export default function CourseQRPanel({ courseId, courseTitle, onLessonsGenerate
               <QRCodeSVG value={uploadUrl} size={180} bgColor="#ffffff" fgColor="#003CA6" level="M" includeMargin={false} />
             </div>
           ) : (
-            <div className="w-[212px] h-[212px] bg-gray-900 rounded-2xl animate-pulse" />
+            <div className="w-[212px] h-[212px] rounded-2xl animate-pulse" style={{ background: '#0d1f38' }} />
           )}
         </div>
 
         {/* URL + copy */}
         <div className="flex items-center gap-2">
           <input readOnly value={uploadUrl}
-            className="flex-1 rounded-lg px-3 py-2 text-xs text-gray-400 font-mono focus:outline-none truncate"
-            style={{ background: '#060e1c', border: '1px solid #1e3a6e' }} />
+            className="flex-1 rounded-lg px-3 py-2 text-xs font-mono focus:outline-none truncate"
+            style={{ background: '#060e1c', border: '1px solid #1e3a6e', color: '#64748b' }} />
           <button onClick={copyLink}
             className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs transition-colors flex-shrink-0"
             style={{ background: '#1e3a6e', color: '#93c5fd' }}>
@@ -119,16 +153,15 @@ export default function CourseQRPanel({ courseId, courseTitle, onLessonsGenerate
       {/* Generate from photos */}
       {screenshots.length > 0 && (
         <div className="rounded-xl p-4 space-y-3" style={{ background: '#0d1f38', border: '1px solid #1e3a6e' }}>
-          <p className="text-xs text-gray-400">
-            <span className="text-white font-medium">{screenshots.length} photo{screenshots.length !== 1 ? 's' : ''}</span> uploaded — AI can now build lessons from these.
+          <p className="text-xs" style={{ color: '#94a3b8' }}>
+            <span className="text-white font-medium">{screenshots.length} photo{screenshots.length !== 1 ? 's' : ''}</span> ready — AI will generate lessons from these.
           </p>
-          <button
-            onClick={generateLessons}
-            disabled={generating}
+          <button onClick={generateLessons} disabled={generating}
             className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50"
-            style={{ background: '#003CA6' }}
-          >
-            {generating ? <><Loader2 className="w-4 h-4 animate-spin" /> Generating lessons...</> : <><Sparkles className="w-4 h-4" /> Generate Lessons from Photos</>}
+            style={{ background: '#003CA6' }}>
+            {generating
+              ? <><Loader2 className="w-4 h-4 animate-spin" /> Generating lessons...</>
+              : <><Sparkles className="w-4 h-4" /> Generate Lessons from Photos</>}
           </button>
           {genMsg && (
             <p className="text-xs text-center" style={{ color: genMsg.startsWith('Error') ? '#f87171' : '#86efac' }}>{genMsg}</p>
@@ -149,22 +182,22 @@ export default function CourseQRPanel({ courseId, courseTitle, onLessonsGenerate
         </div>
 
         {loading && screenshots.length === 0 ? (
-          <div className="space-y-3">{[1, 2].map(i => <div key={i} className="h-32 bg-gray-900 rounded-xl animate-pulse" />)}</div>
+          <div className="space-y-3">{[1, 2].map(i => <div key={i} className="h-32 rounded-xl animate-pulse" style={{ background: '#0d1f38' }} />)}</div>
         ) : screenshots.length === 0 ? (
           <div className="text-center py-10" style={{ color: '#334155' }}>
             <QrCode className="w-8 h-8 mx-auto mb-2 opacity-40" />
             <p className="text-sm">No photos yet</p>
-            <p className="text-xs mt-1">Scan the QR above to start adding content from a phone</p>
+            <p className="text-xs mt-1">Scan the QR above with a phone to start</p>
           </div>
         ) : (
           <div className="space-y-4">
             {screenshots.map(s => (
-              <div key={s.id} className="rounded-xl overflow-hidden border group" style={{ borderColor: '#1e3a6e', background: '#0d1f38' }}>
+              <div key={s.id} className="rounded-xl overflow-hidden group" style={{ border: '1px solid #1e3a6e', background: '#0d1f38' }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={s.imageUrl} alt="" className="w-full object-cover max-h-64" />
                 <div className="px-3 py-2.5 flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
-                    {s.context ? <p className="text-sm text-gray-300">{s.context}</p> : <p className="text-xs text-gray-600 italic">No context</p>}
+                    {s.context ? <p className="text-sm text-gray-300">{s.context}</p> : <p className="text-xs italic" style={{ color: '#475569' }}>No context</p>}
                     <p className="text-xs mt-1" style={{ color: '#475569' }}>
                       {new Date(s.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                     </p>

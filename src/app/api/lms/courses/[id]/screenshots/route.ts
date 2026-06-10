@@ -1,7 +1,7 @@
 import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { lmsCourseScreenshots } from '@/lib/db/schema'
+import { lmsCourseScreenshots, lmsCourses } from '@/lib/db/schema'
 import { eq, desc } from 'drizzle-orm'
 
 export async function GET(
@@ -25,11 +25,16 @@ export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  // Public — no auth, accessible from mobile via QR code scan
+  // Token-based auth — no Clerk session needed, token validates the request
   const { id: courseId } = await params
-  const { imageUrl, context, uploadedBy } = await req.json()
+  const { imageUrl, context, uploadedBy, token } = await req.json()
 
   if (!imageUrl) return NextResponse.json({ error: 'imageUrl required' }, { status: 400 })
+  if (!token) return NextResponse.json({ error: 'Upload token required' }, { status: 401 })
+
+  const [course] = await db.select().from(lmsCourses).where(eq(lmsCourses.id, courseId))
+  if (!course) return NextResponse.json({ error: 'Course not found' }, { status: 404 })
+  if (course.uploadToken !== token) return NextResponse.json({ error: 'Invalid token' }, { status: 403 })
 
   const [screenshot] = await db
     .insert(lmsCourseScreenshots)

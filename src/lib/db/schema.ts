@@ -44,6 +44,7 @@ export const lmsCourses = pgTable('lms_courses', {
   passScoreRequired: integer('pass_score_required').default(70).notNull(), // % to pass quiz
   prerequisiteCourseId: uuid('prerequisite_course_id'),                    // must complete this first
   aiOverview: text('ai_overview'),                                          // JSON: { summary, points[] }
+  uploadToken: uuid('upload_token').defaultRandom(),                        // unique token for QR upload links
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
