@@ -26,6 +26,13 @@ export const ourFileRouter = {
     .onUploadComplete(async ({ file }) => {
       return { url: file.url, name: file.name, type: file.type }
     }),
+
+  // For QR-code screenshot uploads — no auth, accessible from mobile
+  lessonScreenshotUploader: f({ image: { maxFileSize: '16MB', maxFileCount: 1 } })
+    .middleware(async () => ({ userId: 'anonymous' }))
+    .onUploadComplete(async ({ file }) => {
+      return { url: file.url, name: file.name }
+    }),
 } satisfies FileRouter
 
 export type OurFileRouter = typeof ourFileRouter

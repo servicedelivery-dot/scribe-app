@@ -8,6 +8,7 @@ import ReactMarkdown from 'react-markdown'
 import QuizEditor from './QuizEditor'
 import QuizResults from './QuizResults'
 import VideoMetricsPanel from './VideoMetricsPanel'
+import LessonQRPanel from './LessonQRPanel'
 
 interface Lesson { id: string; title: string; content: string; orderIndex: number; moduleId: string; courseId: string }
 interface Module { id: string; title: string; orderIndex: number; courseId: string; lessons: Lesson[] }
@@ -28,7 +29,7 @@ export default function CourseEditor({ course, initialModules }: Props) {
   const [activeView, setActiveView] = useState<'lesson' | 'course-quiz' | 'quiz-results'>('lesson')
   const [lessonContent, setLessonContent] = useState('')
   const [lessonTitle, setLessonTitle] = useState('')
-  const [activeTab, setActiveTab] = useState<'content' | 'quiz'>('content')
+  const [activeTab, setActiveTab] = useState<'content' | 'quiz' | 'qr'>('content')
   const [saving, setSaving] = useState(false)
   const [autoGenerating, setAutoGenerating] = useState(false)
   const [autoGenMsg, setAutoGenMsg] = useState('')
@@ -243,10 +244,10 @@ export default function CourseEditor({ course, initialModules }: Props) {
                 <input value={lessonTitle} onChange={e => setLessonTitle(e.target.value)}
                   className="bg-transparent text-white font-semibold text-sm focus:outline-none min-w-0 flex-1" placeholder="Lesson title" />
                 <div className="flex gap-1 flex-shrink-0">
-                  {(['content', 'quiz'] as const).map(t => (
+                  {(['content', 'quiz', 'qr'] as const).map(t => (
                     <button key={t} onClick={() => setActiveTab(t)}
                       className={`px-3 py-1 rounded-lg text-xs capitalize transition-colors ${activeTab === t ? 'bg-[#003CA6] text-white' : 'text-gray-400 hover:text-white'}`}>
-                      {t}
+                      {t === 'qr' ? '📷 QR' : t}
                     </button>
                   ))}
                 </div>
@@ -303,6 +304,8 @@ export default function CourseEditor({ course, initialModules }: Props) {
                   </div>
                 )
               })()
+            ) : activeTab === 'qr' ? (
+              <LessonQRPanel lessonId={activeLesson.id} lessonTitle={lessonTitle} />
             ) : (
               <div className="flex-1 overflow-y-auto">
                 <QuizEditor courseId={course.id} lessonId={activeLesson.id} />
