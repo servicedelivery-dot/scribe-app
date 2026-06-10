@@ -100,6 +100,14 @@ export default function CourseEditor({ course, initialModules }: Props) {
     setLessonContent(lesson.content)
   }
 
+  async function refreshModules() {
+    const res = await fetch(`/api/lms/courses/${course.id}/modules`)
+    if (!res.ok) return
+    const fresh = await res.json()
+    setModules(fresh)
+    setExpandedModules(new Set(fresh.map((m: { id: string }) => m.id)))
+  }
+
   async function saveLesson() {
     if (!activeLesson) return
     setSaving(true)
@@ -331,7 +339,7 @@ export default function CourseEditor({ course, initialModules }: Props) {
             <CourseQRPanel
               courseId={course.id}
               courseTitle={title}
-              onLessonsGenerated={() => router.refresh()}
+              onLessonsGenerated={() => refreshModules()}
             />
           </div>
         ) : activeView === 'course-quiz' ? (
