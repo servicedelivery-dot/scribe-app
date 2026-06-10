@@ -4,13 +4,18 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
 
 // Fallback chain — tries each model in order until one works
 const MODEL_CHAIN = [
+  'gemini-2.5-flash-preview-05-20',
   'gemini-2.5-flash',
-  'gemini-flash-latest',
   'gemini-2.0-flash',
-  'gemini-2.0-flash-lite',
+  'gemini-2.0-flash-001',
+  'gemini-1.5-flash',
+  'gemini-1.5-flash-latest',
+  'gemini-1.5-pro',
 ]
 
 function isRetryable(message: string) {
+  // Permanent quota exhaustion (limit: 0) — no point retrying other models on same key
+  if (message.includes('limit: 0') || message.includes('free_tier')) return false
   return message.includes('503') || message.includes('overloaded') ||
     message.includes('high demand') || message.includes('429') ||
     message.includes('UNAVAILABLE')
