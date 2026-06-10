@@ -79,6 +79,7 @@ export default function CourseEditor({ course, initialModules }: Props) {
     const lesson = await res.json()
     setModules(prev => prev.map(m => m.id === moduleId ? { ...m, lessons: [...m.lessons, lesson] } : m))
     openLesson(lesson)
+    setActiveTab('qr') // jump straight to QR so the upload link is ready
   }
 
   async function deleteLesson(lessonId: string, moduleId: string) {

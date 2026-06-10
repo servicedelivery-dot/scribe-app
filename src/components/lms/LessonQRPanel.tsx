@@ -23,7 +23,7 @@ export default function LessonQRPanel({ lessonId, lessonTitle }: Props) {
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
-    setUploadUrl(`${window.location.origin}/lms/upload/${lessonId}`)
+    setUploadUrl(`${window.location.origin}/upload/${lessonId}`)
   }, [lessonId])
 
   const fetchScreenshots = useCallback(async () => {

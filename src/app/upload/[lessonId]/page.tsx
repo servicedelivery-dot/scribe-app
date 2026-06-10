@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { useUploadThing } from '@/lib/uploadthing-react'
-import { Camera, Upload, CheckCircle, XCircle, Loader2, ImageIcon, Trash2 } from 'lucide-react'
+import { Camera, Upload, CheckCircle, XCircle, Loader2, ImageIcon, Trash2, Plus } from 'lucide-react'
 
 interface Screenshot {
   id: string
@@ -83,23 +83,26 @@ export default function QRUploadPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white px-4 py-8 max-w-lg mx-auto">
+    <div className="min-h-screen text-white px-4 py-8 max-w-lg mx-auto" style={{ background: '#080f1a' }}>
+
       {/* Header */}
-      <div className="mb-8 text-center">
-        <div className="w-12 h-12 bg-[#003CA6] rounded-2xl flex items-center justify-center mx-auto mb-3">
-          <Camera className="w-6 h-6 text-white" />
+      <div className="mb-6 text-center">
+        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3" style={{ background: '#003CA6' }}>
+          <Camera className="w-7 h-7 text-white" />
         </div>
-        <h1 className="text-xl font-bold text-white">Upload Screenshot</h1>
-        {lessonTitle && (
-          <p className="text-sm text-gray-400 mt-1">for <span className="text-[#00A3E0]">{lessonTitle}</span></p>
+        <h1 className="text-2xl font-bold text-white">Add Screenshot</h1>
+        {lessonTitle ? (
+          <p className="text-sm mt-1" style={{ color: '#00A3E0' }}>{lessonTitle}</p>
+        ) : (
+          <p className="text-sm mt-1 text-gray-600">Loading lesson...</p>
         )}
       </div>
 
-      {/* File picker */}
+      {/* File picker area */}
       <div
-        onClick={() => fileInputRef.current?.click()}
-        className={`relative rounded-2xl border-2 border-dashed transition-colors cursor-pointer mb-4 overflow-hidden
-          ${preview ? 'border-[#003CA6]' : 'border-gray-700 hover:border-gray-500'}`}
+        onClick={() => !preview && fileInputRef.current?.click()}
+        className={`relative rounded-2xl border-2 border-dashed transition-colors mb-4 overflow-hidden
+          ${preview ? 'border-[#003CA6] cursor-default' : 'border-gray-700 hover:border-gray-500 cursor-pointer'}`}
         style={{ minHeight: 200 }}
       >
         {preview ? (
@@ -108,44 +111,46 @@ export default function QRUploadPage() {
             <img src={preview} alt="Preview" className="w-full object-cover rounded-xl" />
             <button
               onClick={e => { e.stopPropagation(); clearFile() }}
-              className="absolute top-2 right-2 bg-gray-900/80 rounded-full p-1.5 hover:bg-red-900/80 transition-colors"
+              className="absolute top-2 right-2 rounded-full p-1.5 transition-colors"
+              style={{ background: 'rgba(9,21,37,0.85)' }}
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="w-4 h-4 text-red-400" />
             </button>
           </>
         ) : (
-          <div className="flex flex-col items-center justify-center py-12 text-gray-500">
-            <ImageIcon className="w-10 h-10 mb-3" />
-            <p className="text-sm font-medium">Tap to choose a photo</p>
+          <div className="flex flex-col items-center justify-center py-14 text-gray-500">
+            <ImageIcon className="w-10 h-10 mb-3 opacity-60" />
+            <p className="text-sm font-medium">Tap to pick a photo or take one</p>
             <p className="text-xs mt-1 text-gray-600">Camera or gallery</p>
           </div>
         )}
       </div>
 
-      {/* Hidden input — capture=environment opens camera on mobile */}
+      {/* Hidden file input — no capture attr so user gets camera + gallery choice */}
       <input
         ref={fileInputRef}
         type="file"
         accept="image/*"
-        capture="environment"
         className="hidden"
         onChange={onFileChange}
       />
 
-      {/* Context text */}
+      {/* Context / notes */}
       <textarea
         value={context}
         onChange={e => setContext(e.target.value)}
-        placeholder="Add context or notes about this screenshot (optional)..."
+        placeholder="Add notes or context about this screenshot (optional)..."
         rows={3}
-        className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-gray-200 placeholder-gray-600 resize-none focus:outline-none focus:border-[#003CA6] mb-4"
+        className="w-full rounded-xl px-4 py-3 text-sm text-gray-200 placeholder-gray-600 resize-none focus:outline-none mb-4"
+        style={{ background: '#0d1f38', border: '1px solid #1e3a6e' }}
       />
 
       {/* Upload button */}
       <button
         onClick={handleUpload}
         disabled={!selectedFile || isUploading}
-        className="w-full flex items-center justify-center gap-2 py-3.5 bg-[#003CA6] hover:bg-[#0048CC] disabled:opacity-40 text-white rounded-xl font-semibold text-sm transition-colors mb-4"
+        className="w-full flex items-center justify-center gap-2 py-4 rounded-xl font-semibold text-sm transition-colors mb-3 disabled:opacity-40"
+        style={{ background: '#003CA6' }}
       >
         {isUploading ? (
           <><Loader2 className="w-4 h-4 animate-spin" /> Uploading...</>
@@ -154,27 +159,40 @@ export default function QRUploadPage() {
         )}
       </button>
 
-      {/* Status messages */}
+      {/* Add another shortcut (shown after success) */}
       {status === 'success' && (
-        <div className="flex items-center gap-2 text-green-400 text-sm bg-green-900/20 border border-green-800/40 rounded-xl px-4 py-3 mb-4">
+        <button
+          onClick={() => { fileInputRef.current?.click(); setStatus('idle') }}
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium transition-colors mb-3"
+          style={{ background: '#0d1f38', border: '1px solid #1e3a6e', color: '#00A3E0' }}
+        >
+          <Plus className="w-4 h-4" /> Add another screenshot
+        </button>
+      )}
+
+      {/* Status feedback */}
+      {status === 'success' && (
+        <div className="flex items-center gap-2 text-green-400 text-sm rounded-xl px-4 py-3 mb-4" style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)' }}>
           <CheckCircle className="w-4 h-4 flex-shrink-0" />
-          Screenshot uploaded and synced to the lesson.
+          Synced to lesson successfully.
         </div>
       )}
       {status === 'error' && (
-        <div className="flex items-center gap-2 text-red-400 text-sm bg-red-900/20 border border-red-800/40 rounded-xl px-4 py-3 mb-4">
+        <div className="flex items-center gap-2 text-red-400 text-sm rounded-xl px-4 py-3 mb-4" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}>
           <XCircle className="w-4 h-4 flex-shrink-0" />
           {errorMsg || 'Upload failed. Please try again.'}
         </div>
       )}
 
-      {/* Recent uploads this session */}
+      {/* This session's uploads */}
       {recentUploads.length > 0 && (
         <div className="mt-6">
-          <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-3">Uploaded this session</p>
+          <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: '#475569' }}>
+            Uploaded this session ({recentUploads.length})
+          </p>
           <div className="space-y-3">
             {recentUploads.map(s => (
-              <div key={s.id} className="bg-gray-900 rounded-xl overflow-hidden border border-gray-800">
+              <div key={s.id} className="rounded-xl overflow-hidden" style={{ border: '1px solid #1e3a6e', background: '#0d1f38' }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={s.imageUrl} alt="Screenshot" className="w-full object-cover max-h-48" />
                 {s.context && (
